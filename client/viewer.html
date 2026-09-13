@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+<title>Aster mirror</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+  :root {
+    --bg: #0b0b0b; --surface: #141414; --raised: #1c1c1c; --border: #262626;
+    --t1: #f2f2f2; --t2: #9a9a9a; --t3: #6b6b6b;
+    --clay: #d85a30; --green: #639922; --amber: #ef9f27; --red: #e24b4a;
+    --sans: Inter, system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace;
+    --dock-w: 48px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; font-family: var(--sans); color: var(--t2); -webkit-font-smoothing: antialiased; }
+  #stage { position: fixed; inset: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  #frame { position: relative; height: 100%; display: flex; min-width: 0; }
+  canvas, video { touch-action: none; height: 100%; width: auto; max-width: 100%; max-height: 100%; aspect-ratio: var(--phone, 9 / 19.5); object-fit: contain; border-radius: 18px; box-shadow: 0 0 0 0.5px var(--border); background: var(--bg); }
+  canvas[hidden], video[hidden] { display: none; }
+  #stage.waiting canvas, #stage.waiting video { animation: breathe 2.6s ease-in-out infinite; }
+  @keyframes breathe { 0%, 100% { background: #0b0b0b; } 50% { background: #141414; } }
+  #hint { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); margin-inline: auto; width: fit-content; display: flex; align-items: center; gap: 9px; max-width: 280px; padding: 10px 14px 10px 12px; border-radius: 999px; background: rgba(20,20,20,.92); border: 0.5px solid var(--border); backdrop-filter: blur(12px); color: var(--t1); font-size: 13px; line-height: 1.35; text-align: left; pointer-events: none; }
+  #hint:empty, #hint.quiet { display: none; }
+  #hint i { width: 14px; height: 14px; flex: none; border-radius: 50%; border: 1.5px solid #303030; border-top-color: var(--clay); animation: spin .9s linear infinite; }
+  #hint.error i { border: 0; background: var(--red); animation: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    #hint i { animation-duration: 2.4s; }
+    #stage.waiting canvas, #stage.waiting video { animation: none; }
+  }
+  #fps { position: absolute; top: 10px; left: 10px; padding: 3px 8px; border-radius: 999px; background: rgba(10,10,10,.6); backdrop-filter: blur(8px); color: var(--t3); font-family: var(--mono); font-size: 11px; pointer-events: none; }
+  #fps:empty { display: none; }
+  #dock { flex: none; width: var(--dock-w); max-height: 100%; overflow: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px; border-radius: 16px; background: rgba(20,20,20,.85); border: 0.5px solid var(--border); backdrop-filter: blur(12px); z-index: 10; scrollbar-width: none; }
+  #dock hr { width: 24px; height: 0.5px; border: 0; margin: 2px 0; background: var(--border); }
+  .key { width: 36px; height: 36px; border: 0; border-radius: 10px; background: transparent; color: var(--t2); display: grid; place-items: center; cursor: pointer; -webkit-tap-highlight-color: transparent; position: relative; }
+  .key svg { width: 18px; height: 18px; }
+  .key:hover, .key:focus-visible { background: var(--raised); color: var(--t1); outline: 0; }
+  .key:active { background: var(--border); color: var(--t1); }
+  .key.on { background: var(--raised); color: var(--t1); }
+  .key[data-label]:hover::after { content: attr(data-label); position: absolute; right: calc(100% + 10px); top: 50%; transform: translateY(-50%); padding: 4px 8px; border-radius: 6px; background: var(--raised); border: 0.5px solid var(--border); color: var(--t1); font-size: 11px; white-space: nowrap; pointer-events: none; }
+  #dock.collapsed > :not(#toggle) { display: none; }
+  #dock.collapsed { width: 22px; padding: 3px; background: rgba(20,20,20,.7); }
+  #dock.collapsed .key { width: 16px; height: 56px; border-radius: 7px; }
+  #dock.collapsed .key svg { width: 13px; height: 13px; transform: rotate(180deg); }
+  .pop { position: fixed; right: calc(12px + var(--dock-w) + 8px); width: 260px; padding: 12px; border-radius: 14px; background: rgba(20,20,20,.95); border: 0.5px solid var(--border); backdrop-filter: blur(12px); display: none; flex-direction: column; gap: 8px; z-index: 11; }
+  .pop.open { display: flex; }
+  .pop label { font-size: 12px; color: var(--t3); }
+  .pop .row { display: flex; gap: 6px; }
+  #text { flex: 1; min-width: 0; height: 40px; padding: 0 12px; border-radius: 10px; border: 0; outline: 0; background: var(--bg); color: var(--t1); font: 400 14px var(--sans); }
+  #text::placeholder { color: var(--t3); }
+  #text:focus { box-shadow: 0 0 0 1px var(--clay); }
+  #send { height: 40px; padding: 0 14px; border: 0; border-radius: 10px; background: var(--clay); color: #faece7; font: 500 13px var(--sans); cursor: pointer; }
+  .opt { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border-radius: 8px; font-size: 13px; color: var(--t2); cursor: pointer; }
+  .opt:hover { background: var(--raised); color: var(--t1); }
+  .opt.on { color: var(--t1); }
+  .opt small { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--t3); }
+  .opt .check { width: 14px; height: 14px; color: var(--clay); visibility: hidden; flex: none; }
+  .opt.on .check { visibility: visible; }
+  @media (max-width: 600px), (max-height: 480px) {
+    #stage { inset: calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom)); flex-direction: column; gap: 8px; }
+    #frame { height: auto; min-height: 0; flex: 1; }
+    canvas, video { max-height: 100%; }
+    #dock { width: 100%; max-width: 420px; flex-direction: row; justify-content: space-between; gap: 2px; padding: 6px 8px; }
+    #dock hr { width: 0.5px; height: 24px; margin: 0 2px; }
+    #dock #toggle { display: none; }
+    .key { width: 40px; height: 40px; }
+    .key[data-label]:hover::after { display: none; }
+    .pop { top: auto !important; right: 12px !important; left: 12px; width: auto; bottom: calc(12px + env(safe-area-inset-bottom) + 60px); }
+  }
+</style>
+</head>
+<body>
+<div id="stage" class="waiting">
+  <div id="frame">
+    <canvas id="screen"></canvas><video id="stream" playsinline muted autoplay hidden></video>
+    <div id="hint" class="quiet"><i></i><span></span></div>
+    <b id="fps"></b>
+  </div>
+  <div id="dock">
+    <button class="key" data-key="back" data-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6"/></svg></button>
+    <button class="key" data-key="home" data-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="6"/></svg></button>
+    <button class="key" data-key="recents" data-label="Recents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
+    <hr>
+    <button class="key" data-key="volume_up" data-label="Volume up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4h4l5 4V6l-5 4H4zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></button>
+    <button class="key" data-key="volume_down" data-label="Volume down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4h4l5 4V6l-5 4H4zM16 9a4 4 0 0 1 0 6"/></svg></button>
+    <button class="key" data-key="notifications" data-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/></svg></button>
+    <hr>
+    <button class="key" id="type-btn" data-label="Type"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/></svg></button>
+    <button class="key" id="quality-btn" data-label="Quality"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18V9M10 18V5M16 18v-7M22 18v-4"/></svg></button>
+    <hr>
+    <button class="key" id="toggle" data-label="Hide the controls"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10 6 6 6-6 6"/></svg></button>
+  </div>
+</div>
+
+<div class="pop" id="type-pop">
+  <label>Type on the phone</label>
+  <div class="row">
+    <input id="text" placeholder="Text" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <button id="send">Send</button>
+  </div>
+</div>
+
+<div class="pop" id="quality-pop">
+  <label>Quality</label>
+  <div id="quality">
+    <div class="opt on" data-q="auto"><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span>Auto</span><small id="auto-now">6 Mbps</small></div>
+    <div class="opt" data-q="smooth"><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span>Smooth</span><small>12 Mbps</small></div>
+    <div class="opt" data-q="normal"><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span>Normal</span><small>6 Mbps</small></div>
+    <div class="opt" data-q="saver"><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span>Data saver</span><small>2 Mbps</small></div>
+  </div>
+</div>
+
+<script src="/jmuxer.min.js"></script>
+<script>
+const canvas = document.getElementById('screen');
+const video = document.getElementById('stream');
+const hint = document.getElementById('hint');
+const hintText = hint.querySelector('span');
+const stage = document.getElementById('stage');
+const fpsEl = document.getElementById('fps');
+const ctx = canvas.getContext('2d');
+let W = 0, H = 0, ws = null, closed = false, frames = 0;
+let TW = 0, TH = 0;
+
+let state = '';
+function setState(next) { state = next; }
+function setHint(text) {
+  hintText.textContent = text || '';
+  hint.classList.toggle('quiet', !text);
+  hint.classList.toggle('error', state === 'error');
+  stage.classList.toggle('waiting', !!text);
+}
+
+const WEBCODECS = typeof VideoDecoder !== 'undefined';
+const MSE = !WEBCODECS && typeof MediaSource !== 'undefined' && typeof JMuxer !== 'undefined';
+const surface = WEBCODECS ? canvas : video;
+canvas.hidden = !WEBCODECS;
+video.hidden = WEBCODECS;
+
+const TIERS = [2000, 6000, 12000];
+const DRIFT_DOWN = 500;
+const DRIFT_UP = 150;
+const PRESETS = {
+  auto:   { auto: true },
+  smooth: { kbps: 12000 },
+  normal: { kbps: 6000 },
+  saver:  { kbps: 2000 },
+};
+const QUALITY_KEY = 'aster-mirror-quality';
+let savedQuality = 'auto';
+try {
+  const q = localStorage.getItem(QUALITY_KEY);
+  if (q && PRESETS[q]) savedQuality = q;
+} catch (_) {}
+const quality = { value: savedQuality };
+let autoKbps = 6000, lastShift = 0, calmSince = 0;
+let delay = { wall: 0, pts: 0, drift: 0, seen: false };
+
+function trackDrift(pts) {
+  const wall = performance.now();
+  if (!delay.seen) { delay = { wall, pts, drift: 0, seen: true }; return; }
+  const d = (wall - delay.wall) - (pts - delay.pts) / 1000;
+  if (d < 0) { delay.wall = wall; delay.pts = pts; delay.drift = 0; return; }
+  delay.drift = delay.drift * 0.7 + d * 0.3;
+}
+const opts = document.querySelectorAll('#quality .opt');
+const autoNow = document.getElementById('auto-now');
+
+function currentKbps() { return PRESETS[quality.value].auto ? autoKbps : PRESETS[quality.value].kbps; }
+function setQuality(name, push) {
+  quality.value = name;
+  opts.forEach((o) => o.classList.toggle('on', o.dataset.q === name));
+  try { localStorage.setItem(QUALITY_KEY, name); } catch (_) {}
+  if (push) send({ type: 'cfg', kbps: currentKbps() });
+}
+opts.forEach((o) => o.addEventListener('click', () => { setQuality(o.dataset.q, true); closePops(); }));
+setQuality(quality.value, false);
+
+function shiftAuto(direction) {
+  const i = TIERS.indexOf(autoKbps);
+  const next = TIERS[Math.max(0, Math.min(TIERS.length - 1, i + direction))];
+  if (next === autoKbps) return;
+  autoKbps = next; lastShift = Date.now(); calmSince = Date.now();
+  delay.seen = false;
+  autoNow.textContent = `${next / 1000} Mbps`;
+  if (PRESETS[quality.value].auto) send({ type: 'cfg', kbps: autoKbps });
+}
+setInterval(() => {
+  fpsEl.textContent = (state === 'live' && frames) ? `${frames} fps` : '';
+  frames = 0;
+  if (!PRESETS[quality.value].auto || !ws || ws.readyState !== 1) return;
+  const now = Date.now();
+  const queued = WEBCODECS && decoder ? decoder.decodeQueueSize : 0;
+  const struggling = delay.drift > DRIFT_DOWN || queued > 5;
+  const calm = delay.drift < DRIFT_UP && queued < 2;
+  if (struggling) {
+    calmSince = now;
+    if (now - lastShift > 10000) shiftAuto(-1);
+  } else if (calm) {
+    if (now - calmSince > 20000 && now - lastShift > 10000) shiftAuto(+1);
+  } else {
+    calmSince = now;
+  }
+}, 1000);
+
+// --- WebCodecs path
+let decoder = null, pendingCodec = null, pendingFrame = null, painting = 0;
+const held = [];
+const HOLD_MAX = 240;
+
+function hold(chunk) {
+  if (chunk.type === 'key') held.length = 0;
+  else if (!held.length) return;
+  if (held.length < HOLD_MAX) held.push(chunk);
+}
+function feedHeld() {
+  for (const chunk of held) decoder.decode(new EncodedVideoChunk(chunk));
+  held.length = 0;
+}
+
+function paint() {
+  painting = 0;
+  const frame = pendingFrame;
+  if (!frame) return;
+  pendingFrame = null;
+  if (canvas.width !== frame.displayWidth || canvas.height !== frame.displayHeight) {
+    canvas.width = W = frame.displayWidth;
+    canvas.height = H = frame.displayHeight;
+  }
+  ctx.drawImage(frame, 0, 0);
+  frame.close();
+  onFrame();
+}
+function stopDecoder() {
+  if (decoder) { try { decoder.close(); } catch (_) {} decoder = null; }
+  pendingCodec = null;
+  held.length = 0;
+  if (pendingFrame) { pendingFrame.close(); pendingFrame = null; }
+}
+function startDecoder(codec, description) {
+  stopDecoder();
+  const d = new VideoDecoder({
+    output: (frame) => {
+      if (pendingFrame) pendingFrame.close();
+      pendingFrame = frame;
+      if (!painting) painting = requestAnimationFrame(paint);
+    },
+    error: (err) => { setState('error'); setHint('The video decoder gave up: ' + err.message); },
+  });
+  const config = { codec, description, hardwareAcceleration: 'prefer-hardware', optimizeForLatency: true };
+  VideoDecoder.isConfigSupported(config).then((ok) => {
+    if (!ok.supported) { setState('error'); setHint('This browser has no H.264 decoder.'); return; }
+    d.configure(config);
+    decoder = d;
+    feedHeld();
+  }).catch((err) => { setState('error'); setHint(err.message); });
+}
+
+// --- MSE path
+let muxer = null, lastPts = 0, params = null;
+const START = new Uint8Array([0, 0, 0, 1]);
+function annexb(avcc) {
+  const parts = []; let i = 0;
+  while (i + 4 <= avcc.length) {
+    const n = (avcc[i] << 24 | avcc[i+1] << 16 | avcc[i+2] << 8 | avcc[i+3]) >>> 0;
+    parts.push(START, avcc.subarray(i + 4, i + 4 + n)); i += 4 + n;
+  }
+  const out = new Uint8Array(parts.reduce((s, p) => s + p.length, 0));
+  let o = 0; for (const p of parts) { out.set(p, o); o += p.length; }
+  return out;
+}
+function paramSets(avcc) {
+  const parts = []; let i = 5;
+  const nSps = avcc[i++] & 0x1f;
+  for (let k = 0; k < nSps; k++) { const n = avcc[i] << 8 | avcc[i+1]; i += 2; parts.push(START, avcc.subarray(i, i + n)); i += n; }
+  const nPps = avcc[i++];
+  for (let k = 0; k < nPps; k++) { const n = avcc[i] << 8 | avcc[i+1]; i += 2; parts.push(START, avcc.subarray(i, i + n)); i += n; }
+  const out = new Uint8Array(parts.reduce((s, p) => s + p.length, 0));
+  let o = 0; for (const p of parts) { out.set(p, o); o += p.length; }
+  return out;
+}
+const FILLER = new Uint8Array([0, 0, 0, 1, 0x0c]);
+
+function join(parts) {
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let at = 0;
+  for (const part of parts) { out.set(part, at); at += part.length; }
+  return out;
+}
+function stopMuxer() {
+  if (muxer) { try { muxer.destroy(); } catch (_) {} muxer = null; }
+  waiting.length = 0;
+  params = null;
+}
+function startMuxer(avcc) {
+  stopMuxer();
+  lastPts = 0;
+  muxer = new JMuxer({
+    node: video, mode: 'video', flushingTime: 0, clearBuffer: true, fps: 60, debug: false,
+    onError: () => { setState('error'); setHint('The player stopped. Reload to try again.'); },
+  });
+  params = paramSets(avcc);
+  video.play().catch(() => {});
+}
+
+const waiting = [];
+const WAIT_MAX = 120;
+function feed(data, duration) {
+  if (!muxer) return;
+  if (!muxer.mseReady) {
+    if (waiting.length < WAIT_MAX) waiting.push({ data, duration });
+    return;
+  }
+  for (const held of waiting.splice(0)) muxer.feed({ video: held.data, duration: held.duration });
+  muxer.feed({ video: data, duration });
+}
+function chaseLive() {
+  const b = video.buffered;
+  if (!b.length) return;
+  const end = b.end(b.length - 1);
+  if (end - video.currentTime > 0.5) video.currentTime = Math.max(0, end - 0.1);
+}
+setInterval(() => { if (MSE && muxer) chaseLive(); }, 500);
+if (!WEBCODECS && typeof video.requestVideoFrameCallback === 'function') {
+  const tick = () => { onFrame(); video.requestVideoFrameCallback(tick); };
+  video.requestVideoFrameCallback(tick);
+}
+function onFrame() {
+  frames++;
+  if (state !== 'live') setState('live');
+  if (hint.textContent) setHint('');
+}
+function stopPlayback() { stopDecoder(); stopMuxer(); }
+function packet(bytes) {
+  const kind = bytes[0];
+  if (kind === 0) {
+    const codec = pendingCodec || 'avc1.42001e';
+    pendingCodec = null;
+    if (WEBCODECS) startDecoder(codec, bytes.slice(1));
+    else if (MSE) startMuxer(bytes.subarray(1));
+    setHint('The first frame is on its way');
+    return;
+  }
+  const view = new DataView(bytes.buffer, bytes.byteOffset + 1, 8);
+  const pts = Number(view.getBigUint64(0));
+  trackDrift(pts);
+  if (WEBCODECS) {
+    const chunk = { type: kind === 1 ? 'key' : 'delta', timestamp: pts, data: bytes.slice(9) };
+    if (!decoder || decoder.state !== 'configured') { hold(chunk); return; }
+    decoder.decode(new EncodedVideoChunk(chunk));
+    return;
+  }
+  if (!muxer) return;
+  const duration = lastPts ? Math.max(1, Math.min(100, (pts - lastPts) / 1000)) : 16;
+  lastPts = pts;
+  const frame = annexb(bytes.subarray(9));
+  feed(join(kind === 1 && params ? [params, frame, FILLER] : [frame, FILLER]), duration);
+  if (typeof video.requestVideoFrameCallback !== 'function') onFrame();
+}
+
+function connect() {
+  closed = false;
+  setState('');
+  setHint('Reaching the phone');
+  ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`);
+  ws.binaryType = 'arraybuffer';
+  ws.onopen = () => {
+    if (!WEBCODECS && !MSE) { setState('error'); setHint('This browser can play neither WebCodecs nor MSE video.'); return; }
+    setState('');
+    setHint('Waking the screen');
+    send({ type: 'cfg', kbps: currentKbps() });
+  };
+  ws.onclose = () => {
+    setState('error');
+    setHint('Lost the phone. Trying again.');
+    stopPlayback();
+    if (!closed) setTimeout(connect, 1500);
+  };
+  ws.onerror = () => ws.close();
+  ws.onmessage = (e) => {
+    if (typeof e.data === 'string') {
+      if (e.data.startsWith('error:')) { setState('error'); setHint(e.data.slice(6).trim()); return; }
+      if (e.data.startsWith('note:')) { setState(''); setHint(e.data.slice(5).trim()); return; }
+      let msg;
+      try { msg = JSON.parse(e.data); } catch (_) { return; }
+      if (msg.type === 'hello') {
+        W = msg.width; H = msg.height;
+        if (WEBCODECS) { canvas.width = W; canvas.height = H; }
+        TW = msg.screen_width || W; TH = msg.screen_height || H;
+        stage.style.setProperty('--phone', `${W} / ${H}`);
+        setHint('The first frame is on its way');
+      } else if (msg.type === 'config') {
+        pendingCodec = msg.codec;
+      }
+      return;
+    }
+    packet(new Uint8Array(e.data));
+  };
+}
+connect();
+
+//---- REDUCED COMMITS ----
+// Step size for move events (original: 2)
+const STEP_PX = 12; // increase to cover more pixels per move, fewer move events
+const TAP_SLOP = 6;
+const PRESS_AFTER = 400;
+let touch = null, target = null, queued = 0;
+
+function at(e) {
+  const r = surface.getBoundingClientRect();
+  return [
+    Math.round((e.clientX - r.left) / r.width * (TW || W)),
+    Math.round((e.clientY - r.top) / r.height * (TH || H)),
+  ];
+}
+function send(obj) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(obj)); }
+
+function flush() {
+  queued = 0;
+  if (!touch || !target) return;
+  const now = performance.now();
+  send({ type: 'move', x: target[0], y: target[1], ms: Math.round(now - touch.sent) });
+  touch.sent = now;
+  target = null;
+}
+
+function release(commit) {
+  if (!touch) return;
+  if (queued) { cancelAnimationFrame(queued); queued = 0; }
+  if (touch.down) {
+    flush();
+    send({ type: 'up' });
+  } else if (commit) {
+    const [x, y] = touch.start;
+    send({ type: Date.now() - touch.at >= PRESS_AFTER ? 'press' : 'tap', x, y });
+  }
+  touch = null;
+  target = null;
+}
+
+// Aggregate pointermove events and only send if we've moved a minimum distance since last commit
+surface.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  closePops();
+  surface.setPointerCapture(e.pointerId);
+  const p = at(e);
+  touch = { id: e.pointerId, sent: performance.now(), last: p, start: p, at: Date.now(), cx: e.clientX, cy: e.clientY, down: false };
+  target = null;
+});
+surface.addEventListener('pointermove', (e) => {
+  if (!touch || e.pointerId !== touch.id) return;
+  if (!touch.down) {
+    if (Math.hypot(e.clientX - touch.cx, e.clientY - touch.cy) < TAP_SLOP) return;
+    touch.down = true;
+    touch.sent = performance.now();
+    send({ type: 'down', x: touch.start[0], y: touch.start[1] });
+  }
+  const p = at(e);
+  // Only commit if moved at least STEP_PX since last committed position
+  if (Math.hypot(p[0] - touch.last[0], p[1] - touch.last[1]) < STEP_PX) return;
+  touch.last = p;
+  target = p;
+  if (!queued) queued = requestAnimationFrame(flush);
+});
+surface.addEventListener('pointerup', (e) => {
+  if (!touch || e.pointerId !== touch.id) return;
+  if (touch.down) target = at(e);
+  release(true);
+});
+surface.addEventListener('pointercancel', () => release(false));
+window.addEventListener('pagehide', () => release(false));
+
+for (const b of document.querySelectorAll('button[data-key]')) {
+  b.addEventListener('click', () => send({ type: 'key', name: b.dataset.key }));
+}
+
+// Typing
+const input = document.getElementById('text');
+function type() {
+  if (input.value) { send({ type: 'text', text: input.value }); input.value = ''; }
+}
+document.getElementById('send').addEventListener('click', type);
+input.addEventListener('keydown', (e) => { if (e.key === 'Enter') type(); if (e.key === 'Escape') closePops(); });
+
+// Popovers
+const dock = document.getElementById('dock');
+const pops = { 'type-btn': document.getElementById('type-pop'), 'quality-btn': document.getElementById('quality-pop') };
+function closePops() {
+  Object.values(pops).forEach((p) => p.classList.remove('open'));
+  Object.keys(pops).forEach((id) => document.getElementById(id).classList.remove('on'));
+}
+const mobile = window.matchMedia('(max-width: 600px), (max-height: 480px)');
+function placePop(btn, pop) {
+  if (mobile.matches) return;
+  const d = dock.getBoundingClientRect();
+  const r = btn.getBoundingClientRect();
+  pop.style.right = `${window.innerWidth - d.left + 8}px`;
+  const top = Math.max(12, Math.min(window.innerHeight - pop.offsetHeight - 12, r.top + r.height / 2 - 28));
+  pop.style.top = `${top}px`;
+}
+Object.entries(pops).forEach(([id, pop]) => {
+  const btn = document.getElementById(id);
+  btn.addEventListener('click', () => {
+    const open = pop.classList.contains('open');
+    closePops();
+    if (!open) {
+      pop.classList.add('open');
+      btn.classList.add('on');
+      placePop(btn, pop);
+      if (id === 'type-btn') input.focus();
+    }
+  });
+});
+
+const toggle = document.getElementById('toggle');
+toggle.addEventListener('click', () => {
+  const c = dock.classList.toggle('collapsed');
+  toggle.dataset.label = c ? 'Show the controls' : 'Hide the controls';
+  closePops();
+});
+
+mobile.addEventListener('change', () => {
+  dock.classList.remove('collapsed');
+  toggle.dataset.label = 'Hide the controls';
+  closePops();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (document.activeElement === input) return;
+  const map = { Escape: 'back', h: 'home', r: 'recents' };
+  if (map[e.key]) { send({ type: 'key', name: map[e.key] }); e.preventDefault(); }
+  if (e.key === 't') { document.getElementById('type-btn').click(); e.preventDefault(); }
+});
+</script>
+</body>
+</html>

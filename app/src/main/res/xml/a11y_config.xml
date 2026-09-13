@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Touch exploration is deliberately not requested: it turns every finger tap
+     into an explore-only touch and makes the phone unusable by hand. -->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeAllMask"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagDefault|flagRetrieveInteractiveWindows|flagReportViewIds|flagIncludeNotImportantViews|flagRequestFilterKeyEvents|flagRequestFingerprintGestures|flagInputMethodEditor"
+    android:canRetrieveWindowContent="true"
+    android:canRequestTouchExplorationMode="true"
+    android:canRequestFilterKeyEvents="true"
+    android:canControlMagnification="true"
+    android:canPerformGestures="true"
+    android:canRequestFingerprintGestures="true"
+    android:canTakeScreenshot="true"
+    android:isAccessibilityTool="true"
+    android:notificationTimeout="0"/>

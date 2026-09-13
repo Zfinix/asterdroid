@@ -1,0 +1,22 @@
+[package]
+name = "asterctl"
+version = "0.1.0"
+edition = "2021"
+
+# Its own workspace: the probe is not part of the Rust build.
+[workspace]
+
+[dependencies]
+libc = "0.2"
+axum = { version = "0.8", features = ["ws"] }
+tokio = { version = "1", features = ["rt-multi-thread", "net", "time", "sync"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[[bin]]
+name = "asterctl"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = "z"
+strip = true

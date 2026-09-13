@@ -1,0 +1,20 @@
+# Signing — the release key and its passwords stay on the machine
+aster-release.jks
+keystore.properties
+
+# Rust
+target/
+
+# Gradle / Android
+build/
+.gradle/
+.kotlin/
+local.properties
+
+# Built on demand by build-agent.sh and build-client.sh
+app/src/main/jniLibs/
+
+# Copied in by the syncDocs task from skills/ and device-AGENTS.md
+app/src/main/assets/*.md
+
+.DS_Store

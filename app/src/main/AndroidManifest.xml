@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+  <!-- Everything a phone can hand to an app. Runtime ones are asked for at
+       launch; special and development ones need grant.sh or a Settings toggle. -->
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+  <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+  <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+  <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
+  <uses-permission android:name="android.permission.NFC"/>
+  <uses-permission android:name="android.permission.TRANSMIT_IR"/>
+  <uses-permission android:name="android.permission.VIBRATE"/>
+  <uses-permission android:name="android.permission.WAKE_LOCK"/>
+  <uses-permission android:name="android.permission.TURN_SCREEN_ON"/>
+  <uses-permission android:name="android.permission.DISABLE_KEYGUARD"/>
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"/>
+  <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES"/>
+  <uses-permission android:name="android.permission.REORDER_TASKS"/>
+  <uses-permission android:name="android.permission.EXPAND_STATUS_BAR"/>
+  <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+  <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS"/>
+  <uses-permission android:name="android.permission.SET_WALLPAPER"/>
+  <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS"/>
+  <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+  <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
+  <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
+  <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+  <uses-permission android:name="android.permission.MANAGE_OWN_CALLS"/>
+  <uses-permission android:name="android.permission.READ_BASIC_PHONE_STATE"/>
+  <uses-permission android:name="android.permission.READ_SYNC_SETTINGS"/>
+  <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
+  <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+  <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+  <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES"/>
+  <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission"/>
+  <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
+  <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
+  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+  <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+  <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage"/>
+  <uses-permission android:name="android.permission.MANAGE_MEDIA"/>
+  <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions"/>
+  <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" tools:ignore="ProtectedPermissions"/>
+  <uses-permission android:name="android.permission.READ_LOGS" tools:ignore="ProtectedPermissions"/>
+  <uses-permission android:name="android.permission.DUMP" tools:ignore="ProtectedPermissions"/>
+  <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" tools:ignore="ProtectedPermissions"/>
+  <uses-permission android:name="android.permission.SET_ANIMATION_SCALE" tools:ignore="ProtectedPermissions"/>
+  <uses-permission android:name="android.permission.BATTERY_STATS" tools:ignore="ProtectedPermissions"/>
+  <uses-permission android:name="android.permission.CAMERA"/>
+  <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+  <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+  <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION"/>
+  <uses-permission android:name="android.permission.READ_CONTACTS"/>
+  <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+  <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+  <uses-permission android:name="android.permission.READ_CALENDAR"/>
+  <uses-permission android:name="android.permission.WRITE_CALENDAR"/>
+  <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+  <uses-permission android:name="android.permission.READ_PHONE_NUMBERS"/>
+  <uses-permission android:name="android.permission.CALL_PHONE"/>
+  <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS"/>
+  <uses-permission android:name="android.permission.ACCEPT_HANDOVER"/>
+  <uses-permission android:name="android.permission.READ_CALL_LOG"/>
+  <uses-permission android:name="android.permission.WRITE_CALL_LOG"/>
+  <uses-permission android:name="com.android.voicemail.permission.ADD_VOICEMAIL"/>
+  <uses-permission android:name="android.permission.USE_SIP"/>
+  <uses-permission android:name="android.permission.SEND_SMS"/>
+  <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+  <uses-permission android:name="android.permission.READ_SMS"/>
+  <uses-permission android:name="android.permission.RECEIVE_MMS"/>
+  <uses-permission android:name="android.permission.RECEIVE_WAP_PUSH"/>
+  <uses-permission android:name="android.permission.BODY_SENSORS"/>
+  <uses-permission android:name="android.permission.BODY_SENSORS_BACKGROUND"/>
+  <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
+  <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
+  <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30"/>
+  <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation"/>
+  <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+  <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
+  <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" android:usesPermissionFlags="neverForLocation"/>
+  <uses-permission android:name="android.permission.UWB_RANGING"/>
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"/>
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>
+  <!-- Android 11 hides other packages unless the app declares what it looks for. -->
+  <queries>
+    <intent>
+      <action android:name="android.intent.action.MAIN"/>
+      <category android:name="android.intent.category.LAUNCHER"/>
+    </intent>
+    <intent><action android:name="android.intent.action.SET_ALARM"/></intent>
+    <intent><action android:name="android.intent.action.SET_TIMER"/></intent>
+    <intent><action android:name="android.intent.action.INSERT"/></intent>
+    <intent><action android:name="android.intent.action.SENDTO"/><data android:scheme="smsto"/></intent>
+    <intent><action android:name="android.intent.action.DIAL"/></intent>
+    <intent><action android:name="android.intent.action.VIEW"/><data android:scheme="https"/></intent>
+    <intent><action android:name="android.intent.action.VIEW"/><data android:scheme="market"/></intent>
+  </queries>
+
+  <application android:label="Aster"
+      android:icon="@mipmap/ic_launcher"
+      android:roundIcon="@mipmap/ic_launcher_round"
+      android:extractNativeLibs="true">
+    <activity android:name=".MainActivity" android:exported="true"
+        android:theme="@style/Theme.Aster">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+    </activity>
+    <service android:name=".AsterA11yService"
+        android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+        android:exported="true">
+      <intent-filter>
+        <action android:name="android.accessibilityservice.AccessibilityService"/>
+      </intent-filter>
+      <meta-data android:name="android.accessibilityservice"
+          android:resource="@xml/a11y_config"/>
+    </service>
+    <service android:name=".AsterAgentService"
+        android:foregroundServiceType="specialUse"
+        android:exported="false">
+      <property
+          android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+          android:value="Keeps the on-device agent running so it can be reached and can react to the phone"/>
+    </service>
+    <service android:name=".MirrorService"
+        android:foregroundServiceType="mediaProjection"
+        android:exported="false"/>
+    <!-- No theme of its own: the system's capture prompt is the whole UI. -->
+    <activity android:name=".MirrorConsentActivity"
+        android:exported="false"
+        android:excludeFromRecents="true"
+        android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+    <service android:name=".AsterIme"
+        android:permission="android.permission.BIND_INPUT_METHOD"
+        android:exported="true">
+      <intent-filter>
+        <action android:name="android.view.InputMethod"/>
+      </intent-filter>
+      <meta-data android:name="android.view.im" android:resource="@xml/method"/>
+    </service>
+    <service android:name=".AsterNotifications"
+        android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+        android:exported="true">
+      <intent-filter>
+        <action android:name="android.service.notification.NotificationListenerService"/>
+      </intent-filter>
+    </service>
+    <receiver android:name=".WakeReceiver" android:exported="false"/>
+    <receiver android:name=".ExportReceiver" android:exported="true">
+      <intent-filter>
+        <action android:name="dev.aster.probe.EXPORT"/>
+      </intent-filter>
+    </receiver>
+    <receiver android:name=".ImportReceiver" android:exported="true">
+      <intent-filter>
+        <action android:name="dev.aster.probe.IMPORT"/>
+        <action android:name="dev.aster.probe.CLEAR_FEED"/>
+      </intent-filter>
+    </receiver>
+  </application>
+</manifest>
