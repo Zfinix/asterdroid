@@ -10,7 +10,11 @@ The app (`dev.aster.probe`) runs the full Aster agent on the phone. An accessibi
 
 **Status:** Used as a daily driver, still experimental. Builds require an Aster checkout, support only `arm64-v8a`, and require broad device permissions.
 
-## Quickstart
+## Setup
+
+Setup has two parts: [build and install the Android app](#build-and-install), then [connect your Telegram bot](#connect-your-telegram-bot). If the app is already installed and permissions are granted, go straight to the Telegram steps.
+
+## Build and install
 
 ### What you need
 
@@ -18,7 +22,6 @@ The app (`dev.aster.probe`) runs the full Aster agent on the phone. An accessibi
 - An [Aster](https://github.com/zfinix/aster) checkout beside this repository, or `ASTER_REPO` pointing to one.
 - `ANDROID_HOME` with build-tools and platform 35, an NDK, and `kotlinc`.
 - A Rust toolchain that can build `std` for a custom target, with `rust-src` installed (`rustup component add rust-src`).
-- A Telegram bot token from [@BotFather](https://t.me/BotFather).
 - Credentials for a supported model provider, or a local OpenAI-compatible endpoint.
 
 ### 1. Build the two binaries
@@ -51,39 +54,68 @@ The script grants runtime permissions, app-op access, notification access, Do No
 
 Check that the accessibility service is enabled. The agent needs it to read and control the screen.
 
-### 4. Add your token and provider key
+## Connect your Telegram bot
 
-Open the app's settings and fill in:
+### 1. Create a bot with BotFather
 
-- **Telegram token:** Your bot token from @BotFather.
-- **Allowed ids:** Telegram user IDs allowed to control the phone. You can get your ID in the next step.
-- **Provider key:** The key for your selected provider, such as `OPENROUTER_API_KEY`.
+Open [@BotFather](https://t.me/BotFather) in Telegram and send `/newbot`. Follow the prompts to name your bot and choose its username. BotFather returns a bot token. Copy it and keep the link to your new bot handy. See [Telegram's bot setup guide](https://core.telegram.org/bots/tutorial#obtain-your-bot-token) for details.
 
-Settings are saved to the agent's `.env` file. Saving a key restarts the agent so it can load the new value.
+### 2. Add the token to asterdroid
 
-You can also push a file from your computer. Its values are merged with the phone's existing configuration:
+On the Android phone, open asterdroid and tap the settings icon in the top right.
 
-```sh
-cat > .env <<'EOF'
-ASTER_TELEGRAM_TOKEN=123456789:AAE...
-OPENROUTER_API_KEY=sk-or-...
-EOF
-adb push .env /sdcard/Android/data/dev.aster.probe/files/.env
-```
+- Paste the full bot token into **Telegram token**.
+- Select your model provider and enter its API key, such as `OPENROUTER_API_KEY`.
+- Leave **Allowed ids** empty for now. The next step gets your numeric Telegram user ID.
 
-### 5. Start the agent
+Save the settings. Changes are written to the agent's `.env`; saving a key restarts the agent.
 
-Press the start control on the home screen. The notification changes from "Starting" to "Connected to Telegram".
+### 3. Start the agent and message your bot
 
-Message the bot. If no users are configured, it replies with your Telegram user ID:
+Press the start control on asterdroid's home screen. Wait for the notification to say **Connected to Telegram**.
+
+In Telegram, open the bot you just created and send `hello`. Send this to your own bot, not BotFather.
+
+With no allowed users configured, it replies:
 
 ```txt
 This bot isn't set up yet. Your user id is 8675309. Restart it with --user 8675309 to allow it.
 ```
 
-Paste that ID into **Allowed ids** in the app's settings. Once the allowlist is configured, the bot ignores messages from other accounts.
+Copy the user ID from your reply. The number above is an example.
 
-Try: "Open settings and turn on Do Not Disturb."
+### 4. Allow your Telegram account
+
+Return to asterdroid's settings, paste that numeric ID into **Allowed ids**, and save. Use your user ID here, not your Telegram username or bot token. To allow multiple accounts, separate their IDs with commas.
+
+The reply mentions `--user`, but on Android you configure this through **Allowed ids**. Once configured, the bot ignores accounts outside that list.
+
+### 5. Send a test instruction
+
+Return to your bot's Telegram chat and send:
+
+```txt
+Open settings and turn on Do Not Disturb.
+```
+
+The agent should respond and carry out the action on the Android phone. Use `/help` for chat commands, or `/mirror` to view the phone in a browser.
+
+If the bot does not reply, check that asterdroid says **Connected to Telegram**, that you opened the bot whose token you entered, and that **Allowed ids** contains the ID from your own reply.
+
+### Optional: configure from your computer
+
+You can push a `.env` instead of entering values in the app. Replace the placeholders with your bot token, provider key and numeric Telegram user ID:
+
+```sh
+cat > .env <<'EOF'
+ASTER_TELEGRAM_TOKEN=YOUR_BOT_TOKEN
+OPENROUTER_API_KEY=YOUR_PROVIDER_KEY
+ASTER_REMOTE_USERS=YOUR_TELEGRAM_USER_ID
+EOF
+adb push .env /sdcard/Android/data/dev.aster.probe/files/.env
+```
+
+The pushed values are merged with the phone's existing configuration. If you do not know your user ID yet, use steps 3 and 4 above to obtain and allow it.
 
 ## Using it from the chat
 
@@ -462,7 +494,7 @@ Measured on a Pixel 7 emulator running Android 15 / API 35 with a software GPU. 
 
 ## Repository layout
 
-```txt
+```
 app/src/main/
   AndroidManifest.xml            permissions, services and receivers
   assets/                        AGENTS.md, the flattened skills, providers.json (generated)
