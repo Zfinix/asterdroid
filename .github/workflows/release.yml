@@ -1,0 +1,184 @@
+name: release
+
+# Builds a signed release of asterdroid. The native binaries are cross-compiled
+# here rather than committed, so a release can never ship a stale libaster.so.
+#
+# Required repository secrets:
+#   ANDROID_KEYSTORE_BASE64    base64 of aster-release.jks
+#   ANDROID_KEYSTORE_PASSWORD  storePassword
+#   ANDROID_KEY_ALIAS          keyAlias
+#   ANDROID_KEY_PASSWORD       keyPassword
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: What to build
+        type: choice
+        options: [both, apk, aab]
+        default: both
+      version:
+        description: versionName (leave empty to keep the one in build.gradle.kts)
+        type: string
+        default: ""
+      version_code:
+        description: versionCode (leave empty to keep the one in build.gradle.kts)
+        type: string
+        default: ""
+      release:
+        description: Publish a GitHub Release for this build
+        type: boolean
+        default: false
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+env:
+  ASTER_REPO: ${{ github.workspace }}/aster
+  ANDROID_NDK_VERSION: 27.2.12479018
+  ANDROID_PLATFORM: "35"
+  ANDROID_BUILD_TOOLS: 35.0.0
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out asterdroid
+        uses: actions/checkout@v4
+        with:
+          path: asterdroid
+
+      # build-agent.sh cross-compiles aster-cli out of the Aster workspace, so
+      # the checkout has to sit beside this repo, where ASTER_REPO points.
+      - name: Check out Aster
+        uses: actions/checkout@v4
+        with:
+          repository: Zfinix/aster
+          path: aster
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install NDK, platform and build-tools
+        run: |
+          sdkmanager --install \
+            "ndk;$ANDROID_NDK_VERSION" \
+            "platforms;android-$ANDROID_PLATFORM" \
+            "build-tools;$ANDROID_BUILD_TOOLS"
+          echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION" >> "$GITHUB_ENV"
+
+      # build-std and JSON target specs are nightly features, and rust-src has
+      # to be present for build-std to have a std to compile.
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rust-src
+          targets: aarch64-linux-android
+
+      - name: Cache cargo and native build output
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            asterdroid/target/android-tls
+            asterdroid/target/android-client
+          key: native-${{ runner.os }}-${{ hashFiles('asterdroid/target-spec/*.json', 'asterdroid/client/Cargo.lock') }}
+          restore-keys: native-${{ runner.os }}-
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Write the signing config
+        working-directory: asterdroid
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -eu
+          for v in KEYSTORE_BASE64 STORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            eval "val=\${$v}"
+            [ -n "$val" ] || { echo "::error::secret $v is not set"; exit 1; }
+          done
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > aster-release.jks
+          cat > keystore.properties <<EOF
+          storeFile=aster-release.jks
+          storePassword=$STORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+          chmod 600 keystore.properties aster-release.jks
+
+      - name: Resolve version
+        id: version
+        working-directory: asterdroid
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_CODE: ${{ inputs.version_code }}
+        run: |
+          set -eu
+          version="$INPUT_VERSION"
+          code="$INPUT_CODE"
+          # A tag push names the version; v0.2.0 becomes 0.2.0.
+          if [ -z "$version" ] && [ "${GITHUB_REF_TYPE:-}" = tag ]; then
+            version="${GITHUB_REF_NAME#v}"
+          fi
+          args=""
+          [ -n "$version" ] && args="$args -v $version"
+          [ -n "$code" ] && args="$args -c $code"
+          echo "args=$args" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Build APK
+        if: inputs.target != 'aab'
+        working-directory: asterdroid
+        run: ./release.sh apk ${{ steps.version.outputs.args }}
+
+      - name: Build AAB
+        if: inputs.target != 'apk'
+        working-directory: asterdroid
+        run: |
+          # The native binaries are already built by the APK step, so reuse
+          # them rather than cross-compiling std and libffi a second time.
+          if [ -f app/src/main/jniLibs/arm64-v8a/libaster.so ]; then
+            ./release.sh aab -s ${{ steps.version.outputs.args }}
+          else
+            ./release.sh aab ${{ steps.version.outputs.args }}
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: asterdroid-${{ steps.version.outputs.version || github.sha }}
+          path: asterdroid/dist/*
+          if-no-files-found: error
+
+      - name: Publish the release
+        if: github.ref_type == 'tag' || inputs.release
+        working-directory: asterdroid
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          tag="${GITHUB_REF_NAME}"
+          if [ "$GITHUB_REF_TYPE" != tag ]; then
+            tag="v${{ steps.version.outputs.version }}"
+          fi
+          notes="docs/release-notes/$tag.md"
+          if [ -f "$notes" ]; then
+            gh release create "$tag" dist/* --title "$tag" --notes-file "$notes"
+          else
+            gh release create "$tag" dist/* --title "$tag" --generate-notes
+          fi

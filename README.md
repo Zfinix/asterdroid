@@ -54,6 +54,41 @@ The script grants runtime permissions, app-op access, notification access, Do No
 
 Check that the accessibility service is enabled. The agent needs it to read and control the screen.
 
+## Releases
+
+`release.sh` builds a signed release. It rebuilds both native binaries, runs the Gradle release task, verifies the signature and writes the artifact to `dist/`.
+
+```sh
+./release.sh apk                  # signed release APK
+./release.sh aab                  # signed release App Bundle
+./release.sh apk -v 0.2.0 -c 2    # set the version, then build
+./release.sh apk -s -i            # reuse jniLibs, install over adb
+```
+
+Signing uses `keystore.properties` and the key it names, both outside git. `./release.sh check` reports the SDK, NDK, build-tools, Aster checkout and signing setup without building anything. `./release.sh version` prints the current version, and `./release.sh notes` prints the matching file from `docs/release-notes/`.
+
+### Releases from CI
+
+`.github/workflows/release.yml` runs the same `release.sh` on GitHub's runners. It checks out Aster beside this repository, installs the NDK, platform 35 and build-tools, cross-compiles both native binaries, then builds and uploads the signed artifacts.
+
+Trigger it by pushing a tag, or by hand from **Actions → release → Run workflow**, where you can pick `apk`, `aab` or both, set the version, and publish a GitHub Release.
+
+```sh
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+A tag push builds both artifacts and publishes a Release, using `docs/release-notes/v0.2.0.md` as the body when that file exists. Add these repository secrets first:
+
+| secret | what it is |
+| --- | --- |
+| `ANDROID_KEYSTORE_BASE64` | `base64 -i aster-release.jks` |
+| `ANDROID_KEYSTORE_PASSWORD` | `storePassword` |
+| `ANDROID_KEY_ALIAS` | `keyAlias` |
+| `ANDROID_KEY_PASSWORD` | `keyPassword` |
+
+The keystore is written to a file and removed with the runner, so the key never leaves the secrets store. The native build is cached on `target/android-tls` and `target/android-client`, which is what keeps a run under the 90 minute timeout after the first one.
+
 ## Connect your Telegram bot
 
 ### 1. Create a bot with BotFather

@@ -7,6 +7,7 @@ target/
 
 # Gradle / Android
 build/
+dist/
 .gradle/
 .kotlin/
 local.properties
