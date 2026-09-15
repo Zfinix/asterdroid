@@ -100,7 +100,7 @@ Open [@BotFather](https://t.me/BotFather) in Telegram and send `/newbot`. Follow
 On the Android phone, open asterdroid and tap the settings icon in the top right.
 
 - Paste the full bot token into **Telegram token**.
-- Select your model provider and enter its API key, such as `OPENROUTER_API_KEY`.
+- Select your model provider and enter its API key. The settings sheet shows the env variable each provider expects.
 - Leave **Allowed ids** empty for now. The next step gets your numeric Telegram user ID.
 
 Save the settings. Changes are written to the agent's `.env`; saving a key restarts the agent.
@@ -144,7 +144,7 @@ You can push a `.env` instead of entering values in the app. Replace the placeho
 ```sh
 cat > .env <<'EOF'
 ASTER_TELEGRAM_TOKEN=YOUR_BOT_TOKEN
-OPENROUTER_API_KEY=YOUR_PROVIDER_KEY
+<PROVIDER>_API_KEY=YOUR_PROVIDER_KEY
 ASTER_REMOTE_USERS=YOUR_TELEGRAM_USER_ID
 EOF
 adb push .env /sdcard/Android/data/dev.aster.probe/files/.env
