@@ -53,6 +53,7 @@ Commands accept the following target formats:
 | OCR block | `ocr` | `tap o3` |
 | blob | `locate` | `drag b0 b3` |
 | rectangle | a map's bounds | `shot 0,452-1080,683` |
+| text | what the element says (`tap` only) | `tap Wi-Fi` |
 
 Stale handles return a message identifying the read to repeat, for example: `no ocr block o4; the last ocr had 3; run ocr again`.
 
@@ -74,12 +75,16 @@ Run `asterctl help` on the device for the command list.
 | `shot jpeg <1-100> <width>` | the same capture scaled, with the real screen size alongside |
 | `marks [off]` | draw the map's indices over the live screen |
 | `events` | which packages are keeping the screen busy, over one settle budget |
+| `pace [reset]` | the learned waits for the app in front |
+| `capture on\|off` | hold the screen capture so blind reads skip the screenshot rate limit |
 
 ### Gestures
 
 | verb | what it does |
 | --- | --- |
 | `tap <target>` | click; resolves up to the row that owns a label |
+| `tap <text>` | click the element whose text or description is that, read as the tap runs |
+| `do <step>; <step> …` | run several verbs in one call; stops at the first that errors or changes nothing |
 | `press <target>` | long press (600 ms): opens context menus |
 | `swipe <from> <to> [ms]` | a flick (300 ms): scrolls, dismisses, archives |
 | `drag <p1> <p2> [p3 …] [ms]` | down, pause, move, pause, up (alias `slide`) |
@@ -138,13 +143,35 @@ changed: +32 -30 pkg=com.android.settings after_ms=713
 
 `posted` means the event was accepted. The `changed` line compares element signatures before and after the action: class, ID, text, description and top-left position. A screen change does not by itself confirm that the intended task succeeded.
 
+When the caller already holds the map the screen changed from, and every unchanged row kept its index, the receipt lists only the changed rows instead of the whole map:
+
+```txt
+receipt: posted ("Wi-Fi" via its row)
+changed: +1 -1 pkg=com.android.settings after_ms=412
+screen: elements=33; rows not listed keep their numbers from the last map
+ 14 [Switch] #switch_widget "On" 924,540-1032,600 tap
+```
+
+A new screen, or one where rows shifted, returns the whole map.
+
 An empty diff returns:
 
 ```txt
 warning: nothing on screen changed; treat as not done
 ```
 
-`quiesce` waits up to 1500 ms for an accessibility event, then waits for 150 ms of quiet within a 600 ms budget. Waiting for the first event prevents a read from returning before the app reacts. The budget prevents animations from blocking indefinitely.
+`quiesce` waits for an accessibility event, then for 150 ms of quiet. Waiting for the first event prevents a read from returning before the app reacts. The quiet budget prevents animations from blocking indefinitely.
+
+Both waits adapt to the phone and the app. The service times every action: how long the first event took, and how long the screen took to go quiet. It keeps the last 32 of each per app and for the whole phone in `SharedPreferences`. After six timed actions, the wait for the first event is 1.5 times the 95th percentile plus 200 ms, between 350 and 1500 ms. The quiet budget is 1.5 times the 90th percentile plus 100 ms, between 250 and 600 ms. An app that fails to go quiet in half of its last 12 actions gets 250 ms. An app with too few samples uses the phone's figures, and a new install uses the old fixed 1500 and 600 ms. App launches keep the fixed budget. `asterctl pace` prints the current figures for the app in front, and `pace reset` forgets them.
+
+A shorter wait can report `+0 -0` for an app that answers late. The service remembers every no-change receipt. If an event arrives from that app within three seconds and the tree differs at the next verb, it records the delay as a sample, which lengthens that app's wait. It also holds the verb instead of running it, because that verb was chosen on the belief that the action failed:
+
+```txt
+note: the last action did land after all, 840ms after it was sent (+3 -1); the wait for this app is now longer
+held: `tap 14` was not run, because it was chosen when that action looked like it failed. Send it again if it is still wanted.
+```
+
+Read-only verbs such as `map`, `find` and `shot` still run, with the note in front.
 
 For screens with no useful accessibility tree, the service compares 152 px-wide thumbnails using an RGB delta threshold, groups changes into rectangles and runs OCR:
 
@@ -153,7 +180,9 @@ changed: tree blind (0 elements); 6% of pixels changed since the frame 2s before
 moved: 84,1204-996,1560; 12,96-1068,240
 ```
 
-`settleBlind` samples thumbnails every 120 ms until consecutive frames differ by no more than 1% for 280 ms, within the same settling budget.
+`settleBlind` samples thumbnails every 120 ms until frames at least 280 ms apart differ by no more than 1%, within the same settling budget. A blind action runs it before reading the result, since no events arrive to say the screen settled.
+
+Frames for the service's own reads (`ocr`, `locate`, `aim`, blind diffs, `wait` on a blind screen) come from the screen capture when one is running. The virtual display is pointed at an `ImageReader` for one frame and handed back to the encoder, so a mirror viewer sees the picture hold for a frame or two. This has no rate limit. `asterctl capture on` starts the capture with nobody watching, auto-accepting the consent dialog, and it stops after 30 idle minutes or with `capture off`. Without a capture, reads fall back to `takeScreenshot`. The service learns the system's minimum spacing between screenshots from the first refusal and waits that long before asking again. `shot` always uses `takeScreenshot`, because it is the picture sent to the person.
 
 ## Reading the screen
 

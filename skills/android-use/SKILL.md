@@ -14,14 +14,37 @@ receipt plus what changed.
 
 Read, act, then read again. An element index is only valid for the map it
 came from, because the numbers are assigned per capture. Every action's
-receipt ends with the new screen's map, so a receipt is a read: tap the next
-index straight from it, with no `map` in between. A dialog chain (pick, OK,
-CLOSE, CLOSE) is one tap per receipt, not a read per tap.
+receipt ends with the new screen, so a receipt is a read: tap the next index
+straight from it, with no `map` in between.
+
+When the screen only changed in place (a toggle flipped, a row appeared), the
+receipt lists just the changed rows under `screen: elements=N; rows not listed
+keep their numbers from the last map`. The rows it leaves out are still there
+at the numbers you already have. A new screen always comes back as the whole
+map.
+
+Every call is a round trip to you, and that round trip is most of the time a
+task takes. When you already know the route, name the targets by their text
+and send the whole route as one call:
+
+```json
+{"command": "asterctl", "args": ["do", "tap Network & internet; tap Internet; tap Wi-Fi"]}
+```
+
+`tap <text>` reads the screen as the tap runs and taps the element that says
+it (exact match first, then contains), so it works for a screen you have not
+mapped yet. `do` runs the steps in order, prints one line per step, and ends
+with the screen after the last one. It stops at the first step that errors or
+changes nothing and tells you which steps it did not run. Use the `args` form
+above, not `sh -c`, because the shell splits on `;`. A dialog chain (pick, OK,
+CLOSE, CLOSE) is one `do`, not four calls.
 
 ```sh
 asterctl map                 # numbered elements on screen now
 asterctl find wifi           # the same list, filtered
 asterctl tap 11              # act on element 11
+asterctl tap Wi-Fi           # act on the element that says Wi-Fi
+asterctl do "tap Wi-Fi; wait Connected"  # several steps, one call
 asterctl scroll down         # reach what is below the fold
 asterctl type "hello"        # type into the focused field
 asterctl key back            # back, home, recents, enter, delete, tab
@@ -35,6 +58,8 @@ asterctl swipe x1,y1 x2,y2   # drag between pixels: carousels, sliders, canvases
 asterctl key enter|delete|tab # into the focused field
 asterctl clear               # empty the focused field
 asterctl notes               # recent notifications, newest first
+asterctl alerts              # battery warnings and apps whose notifications go to the chat
+asterctl alerts add <app>    # send its notifications to the chat; `alerts remove <app>`, `alerts battery off|20,10`
 asterctl ocr                 # read the screen as pixels
 asterctl shot                # the whole screen as a PNG on disk
 asterctl shot 11             # just element 11, with a little margin around it
@@ -160,7 +185,14 @@ changed: +17 -29 pkg=com.android.settings after_ms=649
 ```
 
 `changed: +0 -0` prints a warning and means the screen did not move. Treat that
-as not done. Do not repeat the same tap hoping for a different result; read the
+as not done.
+
+The wait before that verdict is sized to how fast this app has answered on
+this phone, so a slow answer can arrive after it. When that happens, your next
+call comes back with `note: the last action did land after all` and, for
+anything that is not a read, `held: ... was not run`. Take the new screen in
+that reply as the truth, then decide again. Send the held command again only
+if it still makes sense on that screen. Do not repeat the same tap hoping for a different result; read the
 screen and pick a different target, or say what is blocking.
 
 The warning can be wrong in one direction: an app that redraws the same tree
@@ -218,6 +250,12 @@ Some screens return almost nothing (`pkg=com.android.systemui`, a handful
 of elements). Wi-Fi settings is one. Canvas-drawn apps like Maps are another:
 the whole map is a single element with nothing inside it. That is not an error
 and not an empty screen.
+
+On a screen you will read by pixels more than once or twice (a game, a
+drawing, a map you are working in), run `asterctl capture on` first. Blind
+reads then come off the screen capture instead of rate-limited screenshots,
+which is several times faster on every `ocr`, `locate`, `aim` and blind tap.
+It shows the phone's recording indicator; `asterctl capture off` when done.
 
 Run `asterctl ocr`. It reads the pixels and returns text blocks with bounds,
 numbered `o0`, `o1`, and those numbers are targets: `asterctl tap o4` taps
@@ -370,12 +408,13 @@ reminder arrives as a new message with your note in it, and the person can
 use you for other things in between.
 
 While you are still finding the route, run one command per call, so you can
-see which step failed. Once the taps are known (a dialog chain, filling a
-board, a settings toggle you have done before), batch them in one
-`sh -c "asterctl tap …; asterctl tap …"`: each tap is about a second, and a
-seven-tap chain as one call saves six model rounds. Inside a batch,
-`changed: +0 -0` on a cell that was already set is expected; read the shot at
-the end, not every receipt.
+see which step failed. Once the steps are known (a dialog chain, a settings
+toggle you have done before), send them as one `asterctl do "…; …"`: a
+seven-step route as one call saves six model rounds, and it stops by itself
+where the screen stops matching the plan. A tap that is allowed to change
+nothing, like filling a board where a cell may already be set, goes in
+`sh -c "asterctl tap …; asterctl tap …"` instead, because `do` stops there.
+Read the shot at the end, not every receipt.
 
 There is no `bash`, no `python`, and no `asterctl python` on this phone. A
 shell line is `sh -c "…"`. The only Python is `aster python <file>` or

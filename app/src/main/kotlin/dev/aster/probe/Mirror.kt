@@ -3,8 +3,11 @@ package dev.aster.probe
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.PixelFormat
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
+import android.media.ImageReader
 import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
@@ -14,6 +17,7 @@ import android.net.LocalSocket
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.HandlerThread
 import android.os.Looper
 import android.os.PowerManager
 import android.util.Log
@@ -50,6 +54,10 @@ object Mirror {
     private const val KEYFRAME_SECONDS = 10
     private const val FGS_SETTLE_MS = 300L
     private const val PRIORITY_REALTIME = 0
+
+    /** A capture started for the agent's eyes has no viewer, so the stream it encodes can be thin. */
+    private const val IDLE_KBPS = 1_000
+    private const val STILL_BACKOFF_MS = 60_000L
 
     /**
      * How long the capture outlives its last viewer. A whole session of coming
@@ -110,11 +118,15 @@ object Mirror {
         val display: VirtualDisplay,
         val codec: MediaCodec,
         val surface: Surface,
+        /** Where the display draws for the moment it takes to lift one still frame off it. */
+        val reader: ImageReader,
     ) {
         val viewers = CopyOnWriteArrayList<Viewer>()
         /** SPS and PPS, kept so a viewer joining mid-stream can configure. */
         @Volatile var config: ByteArray? = null
         @Volatile var running = true
+        /** When a still frame last failed to arrive; stills are skipped for a while after. */
+        @Volatile var stillMissedAt = 0L
     }
 
     @Volatile private var capture: Capture? = null
@@ -130,6 +142,74 @@ object Mirror {
     private val awakeLock = Any()
     private val idle = Handler(Looper.getMainLooper())
     private val teardown = Runnable { stop() }
+    private val stills = Any()
+    private val stillThread by lazy { HandlerThread("aster-still").apply { start() } }
+
+    /** True while there is a capture to take frames from. */
+    val capturing: Boolean get() = capture != null
+
+    /**
+     * One uncompressed frame off the running capture, at the screen's own size,
+     * or null when there is no capture or it did not answer in time.
+     *
+     * `takeScreenshot` allows one frame every third of a second, which is most
+     * of what reading a canvas costs. The capture has no such limit. It gives
+     * out a single display, already feeding the encoder, so the display is
+     * pointed at a reader for the one frame and handed back: a viewer sees the
+     * picture hold for a frame or two.
+     */
+    fun still(screenW: Int, screenH: Int, timeoutMs: Long): Bitmap? = synchronized(stills) {
+        val live = capture ?: return null
+        // A rotated phone no longer matches the capture's fixed shape.
+        if ((live.width > live.height) != (screenW > screenH)) return null
+        if (System.currentTimeMillis() - live.stillMissedAt < STILL_BACKOFF_MS) return null
+        live.reader.acquireLatestImage()?.close()
+        val done = CountDownLatch(1)
+        var frame: Bitmap? = null
+        live.reader.setOnImageAvailableListener({ reader ->
+            if (frame == null) frame = runCatching { reader.acquireLatestImage()?.use(::bitmap) }.getOrNull()
+            done.countDown()
+        }, Handler(stillThread.looper))
+        val swapped = runCatching { live.display.surface = live.reader.surface }.isSuccess
+        if (swapped) done.await(timeoutMs, TimeUnit.MILLISECONDS)
+        runCatching { live.display.surface = live.surface }
+        live.reader.setOnImageAvailableListener(null, null)
+        val raw = frame ?: run {
+            // A display that drew nothing for the reader would cost every read
+            // this timeout before its screenshot, so stop asking for a while.
+            live.stillMissedAt = System.currentTimeMillis()
+            return null
+        }
+        if (raw.width == screenW && raw.height == screenH) raw
+        else Bitmap.createScaledBitmap(raw, screenW, screenH, true)
+    }
+
+    /**
+     * A capture with nobody watching, so the agent can read a canvas through it.
+     * It lets itself go after the same idle wait a mirror does.
+     */
+    fun ensure(ctx: Context): Boolean {
+        val live = synchronized(lock) {
+            idle.removeCallbacks(teardown)
+            capture ?: start(ctx, IDLE_KBPS)
+        } ?: return false
+        synchronized(lock) {
+            if (capture === live && live.viewers.isEmpty()) idle.postDelayed(teardown, IDLE_MS)
+        }
+        return true
+    }
+
+    /** People on the mirror right now, whom stopping the capture would cut off. */
+    fun viewers(): Int = capture?.viewers?.size ?: 0
+
+    private fun bitmap(image: android.media.Image): Bitmap {
+        val plane = image.planes[0]
+        val stride = plane.rowStride / plane.pixelStride
+        val padded = Bitmap.createBitmap(stride, image.height, Bitmap.Config.ARGB_8888)
+        padded.copyPixelsFromBuffer(plane.buffer)
+        return if (stride == image.width) padded
+        else Bitmap.createBitmap(padded, 0, 0, image.width, image.height)
+    }
 
     /** The consent activity's result, routed back to whoever asked for it. */
     fun onConsent(result: Intent?) {
@@ -152,6 +232,7 @@ object Mirror {
             runCatching { live.codec.stop() }
             runCatching { live.codec.release() }
             runCatching { live.surface.release() }
+            runCatching { live.reader.close() }
             runCatching { live.projection.stop() }
         }
         letSleep()
@@ -361,7 +442,8 @@ object Mirror {
             return null
         }
 
-        val live = Capture(w, h, fps, screen, projection, display, codec, surface)
+        val reader = ImageReader.newInstance(w, h, PixelFormat.RGBA_8888, 2)
+        val live = Capture(w, h, fps, screen, projection, display, codec, surface, reader)
         capture = live
         thread(name = "aster-mirror-drain") { drain(live) }
         return live

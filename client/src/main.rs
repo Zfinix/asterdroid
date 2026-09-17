@@ -52,9 +52,9 @@ fn main() {
     if args.is_empty() {
         println!(
             "usage: asterctl <verb> [args] | asterctl serve\n\
-             verbs: map find tap press swipe drag slide hold pinch text type clear scroll key volume media wait later ocr shot marks notes apps \
+             verbs: map find tap do press swipe drag slide hold pinch text type clear scroll key volume media wait later ocr shot marks notes alerts apps \
              open restart install settings dial sms url web place search alarm timer event wallpaper \
-             quicksettings notifications emergency help\n\
+             quicksettings notifications emergency pace capture help\n\
              serve: the mirror, http://127.0.0.1:7070 [port] [--bind ip], screen out and touches in\n\
              The full reference is the android-use skill already in your prompt."
         );

@@ -47,6 +47,23 @@ class AsterA11yService : AccessibilityService() {
     @Volatile private var serving = false
     private val main = android.os.Handler(android.os.Looper.getMainLooper())
     private var lastSig: List<String> = emptyList()
+    private var lastPkg = ""
+
+    /** The screen as the caller last had it in full, row for row; what a change-only receipt builds on. */
+    private var seenSig: List<String> = emptyList()
+    private val recognizer by lazy { TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS) }
+    private val pace by lazy { Pace(this) }
+    @Volatile private var lastShotAt = 0L
+
+    /**
+     * A receipt that said nothing changed, after a wait sized to how fast this
+     * app usually answers. Kept until the next verb, which checks whether the
+     * screen moved after all.
+     */
+    private class Unconfirmed(val sig: List<String>, val pkg: String, val sentAt: Long) {
+        @Volatile var movedAt = 0L
+    }
+    @Volatile private var unconfirmed: Unconfirmed? = null
     private var lastGrid: Grid? = null
     private var lastOcr: List<Block> = emptyList()
     private var lastFrame: Bitmap? = null
@@ -106,7 +123,9 @@ class AsterA11yService : AccessibilityService() {
             AccessibilityEvent.TYPE_VIEW_SCROLLED -> {
                 lastEventNanos = System.nanoTime()
                 eventCount++
-                eventSources.merge(event.packageName?.toString() ?: "?", 1, Int::plus)
+                val pkg = event.packageName?.toString() ?: "?"
+                eventSources.merge(pkg, 1, Int::plus)
+                unconfirmed?.let { if (it.movedAt == 0L && it.pkg == pkg) it.movedAt = System.currentTimeMillis() }
             }
         }
     }
@@ -253,9 +272,46 @@ class AsterA11yService : AccessibilityService() {
     private fun handle(line: String): String {
         ActivityLog.verb(this, line)
         wake()
-        val reply = lockNote() + dispatch(line)
+        val verb = line.substringBefore(' ')
+        val late = landedLate()
+        val reply = lockNote() + when {
+            late == null -> dispatch(line)
+            verb in READS -> late.first + dispatch(line)
+            else -> late.first + held(verb, late.second)
+        }
         ActivityLog.agent(this, reply.lineSequence().firstOrNull().orEmpty())
         return reply
+    }
+
+    /**
+     * A no-change receipt overturned: the app answered after the wait gave up
+     * on it. The verb that follows was chosen believing the action failed, and
+     * repeating a send or a payment that did go through is the one thing a
+     * shorter wait must never cause. The late answer is also the sample that
+     * lengthens the wait for this app.
+     */
+    @Synchronized private fun landedLate(): Pair<String, Snapshot>? {
+        val doubt = unconfirmed ?: return null
+        unconfirmed = null
+        val lateMs = doubt.movedAt - doubt.sentAt
+        if (doubt.movedAt == 0L || lateMs > LATE_MS) return null
+        val snap = capture()
+        val now = snap.signature()
+        if (now == doubt.sig) return null
+        pace.landed(doubt.pkg, lateMs.toInt())
+        val was = doubt.sig.toHashSet()
+        val nowSet = now.toHashSet()
+        val added = now.count { it !in was }
+        val removed = doubt.sig.count { it !in nowSet }
+        return "note: the last action did land after all, ${lateMs}ms after it was sent (+$added -$removed); " +
+            "the wait for this app is now longer\n" to snap
+    }
+
+    /** The screen as it really is now, in place of a verb that was chosen for one that never was. */
+    private fun held(verb: String, snap: Snapshot): String {
+        remember(snap)
+        return "held: `$verb` was not run, because it was chosen when that action looked like it failed. " +
+            "Send it again if it is still wanted.\npkg=${snap.pkg} elements=${snap.nodes.size}\n" + show(snap)
     }
 
     private fun dispatch(line: String): String = try {
@@ -264,10 +320,8 @@ class AsterA11yService : AccessibilityService() {
         when (verb) {
             "map", "screen" -> map()
             "find" -> find(rest.trim())
-            "tap" -> coords(rest).let {
-                if (',' in it || Grid.isCell(it) || OCR_REF.matches(it) || BLOB_REF.matches(it)) tapAt(it)
-                else act(it.toInt(), null)
-            }
+            "tap" -> tap(rest.trim())
+            "do" -> chain(rest)
             "press" -> press(coords(rest))
             "wait" -> waitFor(rest.trim())
             "later" -> WakeReceiver.schedule(this, rest)
@@ -282,6 +336,7 @@ class AsterA11yService : AccessibilityService() {
             "type" -> type(rest)
             "marks" -> marks(rest.trim())
             "notes" -> notes()
+            "alerts" -> Alerts.command(this, rest)
             "scroll" -> scroll(rest.trim())
             "ocr" -> ocr()
             "locate" -> locate(rest.trim())
@@ -305,6 +360,8 @@ class AsterA11yService : AccessibilityService() {
             "media" -> media(rest.trim())
             "restart" -> restart(rest.trim())
             "events" -> events()
+            "pace" -> pace(rest.trim())
+            "capture" -> capture(rest.trim())
             "help", "--help", "-h" -> HELP
             else -> "error: unknown verb '$verb'; `help` lists them\n"
         }
@@ -316,6 +373,118 @@ class AsterA11yService : AccessibilityService() {
 
     /** `105 1424` and `105,1424` both mean a pixel. */
     private fun coords(spec: String): String = spec.trim().replace(Regex("\\s+"), ",")
+
+    /** An index, a pixel, a cell, an ocr block or a blob; anything else is the text on the element. */
+    private fun tap(spec: String): String {
+        val at = coords(spec)
+        return when {
+            at.toIntOrNull() != null -> act(at.toInt(), null)
+            PIXELS.matches(at) || Grid.isCell(at) || OCR_REF.matches(at) || BLOB_REF.matches(at) -> tapAt(at)
+            else -> tapLabel(spec.trim('"', '\'', ' '))
+        }
+    }
+
+    /**
+     * Tap by what the element says, resolved on a read taken as the tap runs.
+     * An index only holds for the map it came from, so a route planned ahead
+     * (`do tap Network; tap Wi-Fi`) can only name its targets this way.
+     */
+    @Synchronized private fun tapLabel(label: String): String {
+        if (label.isEmpty()) return "error: tap wants an element index, x,y, a cell like F7, o3, b0, or the text on the element\n"
+        val snap = capture()
+        remember(snap)
+        val hits = labelled(snap, label)
+        return when (hits.size) {
+            1 -> act(hits.single(), null)
+            0 -> "error: nothing on screen says \"$label\"\n" + nearest(label, snap) +
+                "pkg=${snap.pkg} elements=${snap.nodes.size}\n" + show(snap)
+            else -> "error: \"$label\" is on ${hits.size} elements; tap one by index\n" +
+                hits.joinToString("") { "%3d %s\n".format(it, snap.nodes[it].line()) }
+        }
+    }
+
+    /**
+     * Elements whose text or description is the label, else contains it. A row
+     * and the label drawn inside it are one target, and the tap walks up from
+     * the label to the row anyway, so only the innermost of a nested pair counts.
+     */
+    private fun labelled(snap: Snapshot, label: String): List<Int> {
+        val says = { i: Int -> listOfNotNull(snap.nodes[i].text, snap.nodes[i].desc).map { it.trim() } }
+        val exact = snap.nodes.indices.filter { i -> says(i).any { it.equals(label, true) } }
+        val hits = exact.ifEmpty { snap.nodes.indices.filter { i -> says(i).any { it.contains(label, true) } } }
+        return hits.filterNot { i ->
+            val outer = snap.nodes[i].bounds
+            // Equal bounds are one target read twice; the walk reaches the deeper one later.
+            hits.any { j -> j != i && outer.contains(snap.nodes[j].bounds) && (j > i || outer != snap.nodes[j].bounds) }
+        }
+    }
+
+    /**
+     * `do tap Network; tap Wi-Fi; wait Connected`: the steps run here, one after
+     * another, so a route already known costs one model round instead of one per
+     * step. It stops at the first step that fails or changes nothing, because
+     * every step after it was planned for a screen that never came.
+     */
+    private fun chain(script: String): String {
+        val steps = script.split(';', '\n').map { it.trim() }.filter { it.isNotEmpty() }
+        if (steps.isEmpty()) return "error: do wants steps separated by ;, like do tap Network; tap Wi-Fi\n"
+        val log = StringBuilder()
+        for ((i, step) in steps.withIndex()) {
+            val verb = step.substringBefore(' ')
+            val at = "step ${i + 1}/${steps.size} ($step)"
+            if (verb == "do" || verb == "live") return log.append("error: $at: $verb cannot run inside do\n").toString()
+            wake()
+            if (i == steps.lastIndex) return log.append("$at\n").append(dispatch(step)).toString()
+            // Nobody reads this step's screen, so the next one must not diff against it as if they had.
+            val seen = seenSig
+            val reply = dispatch(step)
+            seenSig = seen
+            stall(reply)?.let { why ->
+                val rest = steps.drop(i + 1)
+                return log.append("stopped at $at: $why\n")
+                    .append("not run: ").append(rest.joinToString("; ")).append('\n')
+                    .append(reply).toString()
+            }
+            val lines = reply.lineSequence().filter { it.isNotBlank() }
+            log.append(at).append(": ")
+                .append(lines.firstOrNull { it.startsWith("changed:") } ?: lines.firstOrNull().orEmpty())
+                .append('\n')
+        }
+        return log.toString()
+    }
+
+    /** The line that says a step did not land, if one does. A blind screen's pixel diff is left to the caller. */
+    private fun stall(reply: String): String? = reply.lineSequence().firstOrNull {
+        it.startsWith("error:") || it.startsWith("warning:") ||
+            (it.startsWith("receipt:") && !it.startsWith("receipt: posted") && !it.startsWith("receipt: locked"))
+    }
+
+    /** `pace [reset]`: how long the waits are for the app in front, and where the figures come from. */
+    private fun pace(arg: String): String = when (arg) {
+        "reset" -> { pace.reset(); "pace reset: the fixed waits apply until touches are timed again\n" }
+        "" -> pace.describe(rootInActiveWindow?.packageName?.toString() ?: lastPkg)
+        else -> "error: pace takes nothing, or reset\n"
+    }
+
+    /**
+     * `capture on|off`: the screen capture the mirror uses, held with nobody
+     * watching so canvas reads take frames from it instead of rate-limited
+     * screenshots. It shows the phone's recording indicator while it runs.
+     */
+    private fun capture(arg: String): String = when (arg) {
+        "on" -> {
+            MirrorAutoAccept.arm(this)
+            if (Mirror.ensure(this)) "capture on: canvas reads now come off the screen capture\n"
+            else "error: screen capture was not allowed\n"
+        }
+        "off" -> when {
+            !Mirror.capturing -> "capture is already off\n"
+            Mirror.viewers() > 0 -> "capture left on: ${Mirror.viewers()} watching the mirror\n"
+            else -> { Mirror.stop(); "capture off: canvas reads use screenshots again\n" }
+        }
+        "" -> if (Mirror.capturing) "capture is on\n" else "capture is off\n"
+        else -> "error: capture takes on or off\n"
+    }
 
     /** Block until text is on screen or the budget runs out: one call, not sleep-and-reread. */
     private fun waitFor(arg: String): String {
@@ -349,9 +518,14 @@ class AsterA11yService : AccessibilityService() {
                         "the wait was capped at ${WAIT_MAX_SECS}s; wait again if it is still coming\n"
                     } else ""
                 return head + nearest(needle, snap) +
-                    "pkg=${snap.pkg} elements=${snap.nodes.size}\n" + snap.render()
+                    "pkg=${snap.pkg} elements=${snap.nodes.size}\n" + show(snap)
             }
-            SystemClock.sleep(WAIT_POLL_MS)
+            // Nothing can have appeared while the screen is silent, so read
+            // again as soon as it moves rather than on a clock.
+            val seen = eventCount
+            val nextRead = System.currentTimeMillis() + WAIT_POLL_MS
+            SystemClock.sleep(WAIT_TICK_MS)
+            while (System.currentTimeMillis() < nextRead && eventCount == seen) SystemClock.sleep(WAIT_TICK_MS)
         }
     }
 
@@ -362,7 +536,7 @@ class AsterA11yService : AccessibilityService() {
         remember(snap)
         val head = "pkg=%s elements=%d capture_ms=%.1f\n"
             .format(snap.pkg, snap.nodes.size, (System.nanoTime() - started) / 1e6)
-        return head + snap.render()
+        return head + show(snap)
     }
 
     /** The same list, filtered by text, content-desc or id. */
@@ -451,7 +625,7 @@ class AsterA11yService : AccessibilityService() {
         val snap = capture()
         remember(snap)
         val index = callButton(snap)
-            ?: return opened + "no call button on screen. Everything that is:\n" + snap.render()
+            ?: return opened + "no call button on screen. Everything that is:\n" + show(snap)
         val node = marked.getOrNull(index)?.also { it.refresh() }
             ?: return opened + "the call button went stale before it could be pressed\n"
         val pressed = node.performAction(AccessibilityNodeInfo.ACTION_CLICK) || node.tapCenter()
@@ -694,13 +868,24 @@ class AsterA11yService : AccessibilityService() {
         }.getOrElse { "error: could not write the jpeg: $it\n" }
     }
 
-    /** One screenshot, handed back as a bitmap ML Kit and PNG can both take. */
+    /**
+     * One screenshot, handed back as a bitmap ML Kit and PNG can both take.
+     * The system refuses shots closer together than it allows, and how close
+     * that is differs by Android version, so the spacing is learned from the
+     * first refusal and kept to after that.
+     */
     private fun grab(attempt: Int = 0, then: (Bitmap?) -> Unit) {
+        if (attempt == 0 && android.os.Looper.myLooper() != android.os.Looper.getMainLooper()) {
+            val early = lastShotAt + pace.shotGap - System.currentTimeMillis()
+            if (early > 0) SystemClock.sleep(early)
+        }
+        val askedAt = System.currentTimeMillis()
         takeScreenshot(
             Display.DEFAULT_DISPLAY,
             mainExecutor,
             object : TakeScreenshotCallback {
                 override fun onSuccess(shot: ScreenshotResult) {
+                    lastShotAt = askedAt
                     val raw = Bitmap.wrapHardwareBuffer(shot.hardwareBuffer, shot.colorSpace)
                     shot.hardwareBuffer.close()
                     then(raw?.copy(Bitmap.Config.ARGB_8888, false))
@@ -710,7 +895,12 @@ class AsterA11yService : AccessibilityService() {
                     // The system rate-limits screenshots; a shot right after an
                     // ocr trips it. Wait out the interval rather than fail.
                     if (errorCode == ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT && attempt < SHOT_RETRIES) {
-                        main.postDelayed({ grab(attempt + 1, then) }, SHOT_RETRY_MS)
+                        val since = askedAt - lastShotAt
+                        if (lastShotAt > 0 && since < SHOT_GAP_MAX_MS) {
+                            pace.shotGap = max(pace.shotGap, since.toInt() + SHOT_GAP_MARGIN_MS)
+                        }
+                        val retry = (pace.shotGap - since).coerceIn(SHOT_RETRY_MIN_MS, SHOT_GAP_MAX_MS)
+                        main.postDelayed({ grab(attempt + 1, then) }, retry)
                         return
                     }
                     Log.w(TAG, "screenshot refused (code $errorCode)")
@@ -741,7 +931,7 @@ class AsterA11yService : AccessibilityService() {
     private fun recognize(frame: Bitmap): List<Block> {
         val done = CountDownLatch(1)
         var blocks: List<Block> = emptyList()
-        TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+        recognizer
             .process(InputImage.fromBitmap(frame, 0))
             .addOnSuccessListener { text ->
                 blocks = text.textBlocks.map { Block(it.text.oneLine(), it.boundingBox) }
@@ -769,8 +959,15 @@ class AsterA11yService : AccessibilityService() {
         }
     }
 
-    /** One screenshot, waited for. */
+    /**
+     * One frame for the service's own eyes, waited for: off the screen capture
+     * when one is running, which has no rate limit, else a screenshot.
+     */
     private fun grabSync(): Bitmap? {
+        if (Mirror.capturing) {
+            val g = screenGrid()
+            Mirror.still(g.width, g.height, STILL_TIMEOUT_MS)?.let { return it }
+        }
         val done = CountDownLatch(1)
         var frame: Bitmap? = null
         grab { frame = it; done.countDown() }
@@ -841,17 +1038,21 @@ class AsterA11yService : AccessibilityService() {
     private fun settleBlind() {
         val deadline = System.currentTimeMillis() + SETTLE_BUDGET_MS
         var prev = grabSync()?.let(::thumb) ?: return
+        var prevAt = System.currentTimeMillis()
         var stableSince = 0L
         while (System.currentTimeMillis() < deadline) {
             SystemClock.sleep(STILL_POLL_MS)
             val next = grabSync()?.let(::thumb) ?: return
             if (changedPercent(prev, next) <= STILL_PERCENT) {
-                if (stableSince == 0L) stableSince = System.currentTimeMillis()
+                // The pair is only as far apart as frames can be taken, so the
+                // calm is counted from the earlier frame, not from this read.
+                if (stableSince == 0L) stableSince = prevAt
                 if (System.currentTimeMillis() - stableSince >= STILL_HOLD_MS) return
             } else {
                 stableSince = 0L
             }
             prev = next
+            prevAt = System.currentTimeMillis()
         }
     }
 
@@ -1134,50 +1335,100 @@ class AsterA11yService : AccessibilityService() {
     /** A receipt says the event was posted. Only the re-read says it worked. */
     private fun settleAndDiff(what: String, eventsBefore: Int): String {
         val started = System.nanoTime()
-        quiesce(SETTLE_BUDGET_MS, eventsBefore)
+        val sentAt = System.currentTimeMillis()
+        quiesce(SETTLE_BUDGET_MS, eventsBefore, lastPkg)
         val after = capture()
         val now = after.signature()
-        val added = now.count { it !in lastSig }
-        val removed = lastSig.count { it !in now }
+        val was = lastSig
+        val wasPkg = lastPkg
+        val nowSet = now.toHashSet()
+        val wasSet = was.toHashSet()
+        val added = now.count { it !in wasSet }
+        val removed = was.count { it !in nowSet }
         remember(after)
         val head = "receipt: posted (%s)\nchanged: +%d -%d pkg=%s after_ms=%.0f\n"
             .format(what, added, removed, after.pkg, (System.nanoTime() - started) / 1e6)
         if (overlay.isShowing) paint(after)
         if (now.isEmpty()) {
+            // No events reach a blind screen to say it settled, so the pixels have to.
+            settleBlind()
             val receipt = "receipt: posted (%s)\n".format(what)
             return receipt + observeBlind()
         }
+        if (added == 0 && removed == 0) unconfirmed = Unconfirmed(now, wasPkg, sentAt)
         val doubt = if (added == 0 && removed == 0) {
             "warning: nothing on screen changed; treat as not done\n"
         } else {
             ""
         }
-        return head + doubt + after.render()
+        return head + doubt + changes(after, was, wasPkg)
+    }
+
+    /**
+     * The screen after an action, as little of it as the caller needs. A whole
+     * map is thousands of characters resent to the model on every step. When
+     * the caller already holds the map this screen grew from, and every row it
+     * kept still sits at its old number, only the new rows are printed.
+     */
+    private fun changes(after: Snapshot, before: List<String>, beforePkg: String): String {
+        val now = after.signature()
+        val kept = before.toHashSet()
+        val inPlace = before.isNotEmpty() && before == seenSig && after.pkg == beforePkg &&
+            now.indices.all { i -> now[i] !in kept || before.getOrNull(i) == now[i] }
+        val fresh = now.indices.filter { now[it] !in kept }
+        if (!inPlace || fresh.size * 2 > now.size) return show(after)
+        seenSig = now
+        if (fresh.isEmpty() && now.size == before.size) return "screen: the same as the last map\n"
+        val lines = after.lines()
+        return "screen: elements=${now.size}; rows not listed keep their numbers from the last map\n" +
+            fresh.joinToString("") { "%3d %s\n".format(it, lines[it].trim()) }
+    }
+
+    /** The whole map, recorded as what the caller now holds. */
+    private fun show(snap: Snapshot): String {
+        seenSig = snap.signature()
+        return snap.render()
     }
 
     /**
      * Wait for the action to land, then for the screen to stop moving. Waiting
      * only for quiet returns instantly when the app has not reacted yet, which
      * reads the stale tree and reports a change that did happen as no change.
+     *
+     * Given the app in front, both waits are sized from how fast that app has
+     * answered on this phone, and this wait's timings join what is known. A
+     * launch passes none and keeps the fixed budget, since how long a cold
+     * start takes says nothing about how long a tap does.
      */
-    private fun quiesce(maxMs: Int, eventsBefore: Int) {
-        val deadline = System.currentTimeMillis() + maxMs
-        while (System.currentTimeMillis() < deadline && eventCount == eventsBefore) {
-            SystemClock.sleep(20)
+    private fun quiesce(maxMs: Int, eventsBefore: Int, pkg: String? = null) {
+        val started = System.currentTimeMillis()
+        val deadline = started + maxMs
+        val landBy = if (pkg == null) deadline else min(deadline, started + pace.landWindow(pkg))
+        while (System.currentTimeMillis() < landBy && eventCount == eventsBefore) {
+            SystemClock.sleep(POLL_MS)
         }
+        if (eventCount == eventsBefore) return
+        val landedAt = System.currentTimeMillis()
+        pkg?.let { pace.landed(it, (landedAt - started).toInt()) }
         // A marquee or a spinner never goes quiet; once the action has landed,
         // a bounded wait for calm is all the extra certainty there is.
-        val quietBy = min(deadline, System.currentTimeMillis() + QUIET_BUDGET_MS)
+        val budget = pkg?.let { pace.quietBudget(it).toLong() } ?: QUIET_BUDGET_MS
+        val quietBy = min(deadline, landedAt + budget)
         while (System.currentTimeMillis() < quietBy) {
-            if ((System.nanoTime() - lastEventNanos) / 1_000_000 > QUIET_MS) return
-            SystemClock.sleep(20)
+            if ((System.nanoTime() - lastEventNanos) / 1_000_000 > QUIET_MS) {
+                pkg?.let { pace.settled(it, (System.currentTimeMillis() - landedAt).toInt(), quiet = true) }
+                return
+            }
+            SystemClock.sleep(POLL_MS)
         }
+        pkg?.let { pace.settled(it, (System.currentTimeMillis() - landedAt).toInt(), quiet = false) }
     }
 
     private fun remember(snap: Snapshot) {
         marked.clear()
         snap.nodes.forEach { marked.add(it.ref) }
         lastSig = snap.signature()
+        lastPkg = snap.pkg
     }
 
     /** One full read of the screen, pruned to what a caller could act on or read. */
@@ -1666,6 +1917,7 @@ class AsterA11yService : AccessibilityService() {
         val AIM_TOL = Math.toRadians(2.0)
         val BLOB_REF = Regex("b(\\d+)")
         val OCR_REF = Regex("o(\\d+)")
+        val PIXELS = Regex("[\\d.,-]+")
         const val OCR_BUDGET_SECONDS = 10L
         const val CROP_PADDING = 24
         const val BIND_TRIES = 10
@@ -1689,9 +1941,20 @@ class AsterA11yService : AccessibilityService() {
          * was never going to appear. Cap it so a bad guess costs seconds. */
         const val WAIT_MAX_SECS = 20
         const val WAIT_POLL_MS = 500L
+        const val WAIT_TICK_MS = 80L
+        const val POLL_MS = 10L
+
+        /** A screen that moves later than this after a no-change receipt moved for some other reason. */
+        const val LATE_MS = 3_000L
+        const val STILL_TIMEOUT_MS = 250L
+        const val SHOT_GAP_MAX_MS = 1_200L
+        const val SHOT_GAP_MARGIN_MS = 25
+        const val SHOT_RETRY_MIN_MS = 50L
+
+        /** Verbs that only look. A late landing is reported ahead of them rather than holding them back. */
+        val READS = setOf("map", "screen", "find", "ocr", "shot", "notes", "apps", "events", "help", "marks", "pace", "wait")
         const val BAR_MAX_PX = 200
         const val SHOT_RETRIES = 3
-        const val SHOT_RETRY_MS = 400L
         const val HELP = """read:
   map                      numbered, actionable elements; the index is the handle
   find <text>              the same list, filtered by text, desc or id
@@ -1703,7 +1966,8 @@ class AsterA11yService : AccessibilityService() {
   shot jpeg <1-100> <width>  scaled jpeg, for the mirror
   marks [off]              draw the map's indices over the live screen
 act:
-  tap <target>             click. element, x,y, cell F7, ocr block o3, blob b0
+  tap <target>             click. element, x,y, cell F7, ocr block o3, blob b0, or the text on it
+  do <step>; <step> ...    run steps in one call; stops at the first that fails or changes nothing
   press <target>           long-press: the menus a tap never reaches
   swipe <from> <to> [ms]   a flick: scrolls, dismisses, archives
   drag <p1> <p2> [p3 ...] [ms]   a held move with pauses: sliders, cues, reordering (alias slide)
@@ -1721,6 +1985,8 @@ type:
 wait & wake:
   wait <text> [secs]       block until the text is on screen (default 30s)
   later <30s|2m|1h|18:30> <what to do>   end the turn; a reminder wakes you then
+  alerts                   battery warnings and apps whose notifications go to the chat
+  alerts battery on|off|20,10 | alerts add <app> | alerts remove <app>
 straight there:
   open <app> | restart <app> | install <app> | settings [name]
   dial <number> | sms <number> [text] | url <address> | search <q> | place <q>
@@ -1733,7 +1999,9 @@ other:
   volume [up|down|max|mute|0-100] [media|ring|alarm|notification|call]
   media pause|play|toggle|next|prev
   quicksettings | notifications (the shade) | events | help
-targets: element n (map) | x,y | cell F7 (shot grid) | ocr block o3 (ocr) | blob b0 (locate)
+  pace [reset]             how long the waits are for the app in front, learned from its touches
+  capture on|off           hold the screen capture so canvas reads skip the screenshot rate limit
+targets: element n (map) | x,y | cell F7 (shot grid) | ocr block o3 (ocr) | blob b0 (locate) | text (tap)
 a stale handle errors with the read to re-run
 """
 
