@@ -21,8 +21,8 @@ android {
         applicationId = "dev.aster.probe"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1"
+        versionCode = 2
+        versionName = "0.2.0"
     }
 
     // The agent and the control client ride here because an app may only exec
