@@ -26,6 +26,7 @@ class AsterAgentService : Service() {
 
     @Volatile private var running = false
     private var child: Process? = null
+    private val battery = BatteryWatch()
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -38,6 +39,7 @@ class AsterAgentService : Service() {
         connectedAt = 0L
         restarts = 0
         startForeground(NOTIFICATION_ID, notification("Starting"))
+        battery.start(this)
         supervise()
         // START_STICKY: if the system reclaims us under pressure, come back.
         return START_STICKY
@@ -49,6 +51,7 @@ class AsterAgentService : Service() {
         since = 0L
         connectedAt = 0L
         runCatching { child?.destroy() }
+        battery.stop(this)
         super.onDestroy()
     }
 

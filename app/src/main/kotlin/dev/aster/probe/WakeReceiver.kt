@@ -70,7 +70,7 @@ class WakeReceiver : BroadcastReceiver() {
             return target.toInstant().toEpochMilli() - System.currentTimeMillis()
         }
 
-        private fun quote(s: String): String =
+        fun quote(s: String): String =
             "\"" + s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n") + "\""
     }
 }
