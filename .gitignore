@@ -20,3 +20,5 @@ app/src/main/assets/*.md
 
 .DS_Store
 \.env
+
+web/
