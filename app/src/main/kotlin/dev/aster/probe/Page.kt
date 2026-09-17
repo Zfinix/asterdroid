@@ -4,4 +4,5 @@ package dev.aster.probe
 sealed interface Page {
     data object Home : Page
     data object History : Page
+    data object Settings : Page
 }

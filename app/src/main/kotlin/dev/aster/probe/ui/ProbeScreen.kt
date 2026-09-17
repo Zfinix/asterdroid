@@ -43,16 +43,14 @@ fun ProbeScreen(
     models: List<dev.aster.probe.Models.Model>,
     effort: String,
     loadingModels: Boolean,
-    env: List<EnvEntry>,
     onGrant: (Grant) -> Unit,
     onProvider: (dev.aster.probe.Models.Provider) -> Unit,
     onModel: (String) -> Unit,
     onEffort: (String) -> Unit,
-    onEnv: (String, String) -> Unit,
     onToggle: () -> Unit,
     onHistory: () -> Unit,
+    onSettings: () -> Unit,
 ) {
-    var settings by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -80,7 +78,7 @@ fun ProbeScreen(
             ) {
                 AgentStatus(running = running)
                 Box(
-                    modifier = Modifier.size(36.dp).pressable { settings = true },
+                    modifier = Modifier.size(36.dp).pressable(onSettings),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
@@ -148,8 +146,5 @@ fun ProbeScreen(
         }
         AgentButton(running = running, onToggle = onToggle, modifier = Modifier.padding(top = 8.dp))
         Spacer(Modifier.height(Gutter))
-    }
-    if (settings) {
-        SettingsSheet(entries = env, onSet = onEnv, onDismiss = { settings = false })
     }
 }

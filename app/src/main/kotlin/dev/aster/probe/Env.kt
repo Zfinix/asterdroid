@@ -45,6 +45,16 @@ object Env {
         write(context, kept + incoming.map { (name, value) -> "$name=$value" })
     }
 
+    /** The file as it reads, for the editor that takes the whole thing at once. */
+    fun text(context: Context): String = lines(context).joinToString("\n")
+
+    /**
+     * Replace every line, comments and blanks included. The parsed rows cannot
+     * express a file someone keeps notes in, so the raw editor saves through
+     * here rather than through [set] one name at a time.
+     */
+    fun replace(context: Context, text: String) = write(context, text.lines())
+
     private fun lines(context: Context): List<String> =
         runCatching { file(context).readLines() }.getOrDefault(emptyList())
 

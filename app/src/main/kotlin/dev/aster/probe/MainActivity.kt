@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import dev.aster.probe.ui.AsterTheme
 import dev.aster.probe.ui.EnvEntry
+import dev.aster.probe.ui.SettingsScreen
 import dev.aster.probe.ui.Grant
 import dev.aster.probe.ui.GrantId
 import dev.aster.probe.ui.HistoryScreen
@@ -42,6 +43,7 @@ class MainActivity : ComponentActivity() {
     private var effort by mutableStateOf("")
     private var models by mutableStateOf(emptyList<Models.Model>())
     private var env by mutableStateOf(emptyList<EnvEntry>())
+    private var envText by mutableStateOf("")
     private var loadingModels by mutableStateOf(false)
     private var page by mutableStateOf<Page>(Page.Home)
     private var sessions by mutableStateOf(emptyList<Session>())
@@ -85,14 +87,20 @@ class MainActivity : ComponentActivity() {
                         models = models,
                         effort = effort,
                         loadingModels = loadingModels,
-                        env = env,
                         onGrant = ::grant,
                         onProvider = ::chooseProvider,
                         onModel = ::chooseModel,
                         onEffort = ::chooseEffort,
-                        onEnv = ::setEnv,
                         onToggle = ::toggle,
                         onHistory = ::openHistory,
+                        onSettings = { page = Page.Settings },
+                    )
+                    Page.Settings -> SettingsScreen(
+                        entries = env,
+                        raw = envText,
+                        onSet = ::setEnv,
+                        onRaw = ::replaceEnv,
+                        onBack = ::back,
                     )
                     Page.History -> HistoryScreen(
                         sessions = sessions,
@@ -258,6 +266,16 @@ class MainActivity : ComponentActivity() {
         restartAgent(if (value.isBlank()) "$label cleared" else "the new $label")
     }
 
+    /**
+     * The whole file at once, for a name no row covers. Same restart as [setEnv],
+     * for the same reason: the child reads the file only as it starts.
+     */
+    private fun replaceEnv(text: String) {
+        Env.replace(this, text)
+        refresh()
+        restartAgent("the edited .env")
+    }
+
     private fun chooseEffort(picked: String) {
         Models.chooseEffort(this, picked)
         effort = picked
@@ -300,6 +318,7 @@ class MainActivity : ComponentActivity() {
         effort = Models.currentEffort(this)
         if (chosen != null && chosen?.id != was) fetchModels(chosen!!)
         env = envEntries()
+        envText = Env.text(this)
         grants = listOf(
             Grant(
                 GrantId.SCREEN,
@@ -324,12 +343,14 @@ class MainActivity : ComponentActivity() {
 
     /**
      * What the phone cannot be reached without: a bot token, whoever is allowed
-     * to message it, and a key for the chosen provider.
+     * to message it, and a key for the chosen provider. Everything else the
+     * file already carries follows it, because a key set for a provider that is
+     * not the current one was held but never shown, and so looked lost.
      */
     private fun envEntries(): List<EnvEntry> {
         val values = Env.all(this)
         val provider = chosen
-        return listOfNotNull(
+        val first = listOfNotNull(
             EnvEntry(
                 name = Env.TELEGRAM_TOKEN,
                 label = "Telegram token",
@@ -355,7 +376,25 @@ class MainActivity : ComponentActivity() {
                 )
             },
         )
+        val rest = (values.keys - first.map { it.name }.toSet()).sorted().map { name ->
+            EnvEntry(
+                name = name,
+                label = envLabel(name),
+                value = values[name].orEmpty(),
+                secret = envSecret(name),
+                need = "",
+            )
+        }
+        return first + rest
     }
+
+    /** A provider's key var reads better as the provider than as its own name. */
+    private fun envLabel(name: String): String =
+        providers.firstOrNull { name in it.keyVars }?.let { "${it.name} key" } ?: name
+
+    /** Anything that reads like a credential is dotted out in the list. */
+    private fun envSecret(name: String): Boolean =
+        name.uppercase().let { upper -> SECRETISH.any { it in upper } }
 
     /**
      * None of the three is a runtime permission, so the closest thing to a
@@ -443,5 +482,6 @@ class MainActivity : ComponentActivity() {
         const val LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"
         // Public since Android 11, but never added to the SDK's Settings class.
         const val A11Y_DETAIL = "android.settings.ACCESSIBILITY_DETAILS_SETTINGS"
+        val SECRETISH = listOf("KEY", "TOKEN", "SECRET", "PASSWORD")
     }
 }
