@@ -38,6 +38,19 @@ pub fn fire(cmd: &str) -> std::io::Result<()> {
     s.flush()
 }
 
+/// A command with a ceiling on the reply, for callers that must not hang when
+/// the service stops answering mid-command.
+pub fn one_within(cmd: &str, limit: std::time::Duration) -> std::io::Result<String> {
+    let mut s = connect()?;
+    s.set_read_timeout(Some(limit))?;
+    s.set_write_timeout(Some(limit))?;
+    s.write_all(format!("{cmd}\n").as_bytes())?;
+    s.flush()?;
+    let mut reply = String::new();
+    s.read_to_string(&mut reply)?;
+    Ok(reply)
+}
+
 pub fn one(cmd: &str) -> std::io::Result<String> {
     Ok(one_timed(cmd)?.2)
 }

@@ -60,7 +60,9 @@ export CARGO_TARGET_AARCH64_LINUX_ANDROID_RUSTFLAGS="-C link-arg=$RT -L $FFI_DIR
 # build-std and JSON target specs are nightly features; rust-src must be installed.
 export RUSTC_BOOTSTRAP=1
 
+# Optional cargo features for the agent, e.g. ASTER_FEATURES=jev.
 cargo build --release -p aster-cli --bin aster \
+  ${ASTER_FEATURES:+--features "$ASTER_FEATURES"} \
   --manifest-path "$ASTER_REPO/Cargo.toml" \
   --target target-spec/aarch64-linux-android.json \
   --target-dir target/android-tls \
