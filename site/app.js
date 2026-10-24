@@ -343,10 +343,13 @@ document.querySelectorAll('.qa').forEach((d) => {
 
 const copyBtn = document.querySelector('.cmd-copy');
 copyBtn?.addEventListener('click', async () => {
+  let copied = true;
   try { await navigator.clipboard.writeText('npx @withaster/droid pair'); } catch {
     const range = document.createRange(); range.selectNodeContents(copyBtn.previousElementSibling);
     const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range);
+    try { copied = document.execCommand('copy'); } catch { copied = false; }
   }
+  if (!copied) { copyBtn.setAttribute('aria-label', 'Command selected, press Ctrl+C to copy'); return; }
   copyBtn.classList.add('done');
   copyBtn.setAttribute('aria-label', 'Copied');
   clearTimeout(copyBtn._t);
