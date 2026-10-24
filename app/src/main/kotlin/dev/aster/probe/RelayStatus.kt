@@ -123,7 +123,8 @@ object RelayStatus {
     }
 
     private const val PREFIX = "relay:"
-    private const val ANSWER_WAIT_S = 10L
+    /** The connector waits 15 s on the relay and asterctl 5 s more; this waits past both. */
+    private const val ANSWER_WAIT_S = 25L
     private const val NOTE_CAP = 80
     private const val TAG = "ASTERRELAY"
 }

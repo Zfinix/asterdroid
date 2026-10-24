@@ -142,6 +142,7 @@ class SetupLinkTest {
     fun `plain http is only taken to a private address`() {
         bad(payload { put("p", JSONObject().put("id", "ollama").put("url", "http://example.com:11434/v1")) })
         bad(payload { put("relay", JSONObject().put("url", "http://relay.example.com")) })
+        bad(payload { put("relay", JSONObject().put("url", "http://192.168.1.20:8787")) })
         val local = ok(payload { put("p", JSONObject().put("id", "ollama").put("url", "http://192.168.1.20:11434/v1").put("m", "qwen3.8:27b")) })
         assertEquals("http://192.168.1.20:11434/v1", local.brain?.url)
     }

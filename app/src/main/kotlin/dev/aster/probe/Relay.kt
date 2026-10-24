@@ -4,6 +4,7 @@ import android.net.LocalSocket
 import android.net.LocalSocketAddress
 import org.json.JSONArray
 import org.json.JSONObject
+import java.net.URI
 
 /**
  * Questions for the running relay connector: a pairing code, the paired
@@ -114,6 +115,19 @@ object Relay {
         val host = url?.let(Lan::host)?.lowercase() ?: return false
         return host != Lan.host(DEFAULT_URL)
     }
+
+    /** The connector's own rule: https anywhere, plain http only on this phone or the emulator's host. */
+    fun usable(url: String): Boolean {
+        val uri = runCatching { URI(url.trim()) }.getOrNull() ?: return false
+        val host = uri.host?.lowercase() ?: return false
+        return when (uri.scheme?.lowercase()) {
+            "https" -> true
+            "http" -> host in LOCAL
+            else -> false
+        }
+    }
+
+    private val LOCAL = setOf("localhost", "127.0.0.1", "10.0.2.2")
 
     private const val SOCKET = "aster-relay"
     /** The connector waits 15 s on the relay itself; a little longer here so its own answer arrives. */

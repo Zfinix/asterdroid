@@ -19,6 +19,16 @@ class RelayTest {
     }
 
     @Test
+    fun `only an address the connector will dial is usable`() {
+        assertTrue(Relay.usable("https://relay.example.org"))
+        assertTrue(Relay.usable("http://localhost:8787"))
+        assertTrue(Relay.usable("http://10.0.2.2:8787"))
+        assertFalse(Relay.usable("http://192.168.1.20:8787"))
+        assertFalse(Relay.usable("ws://relay.example.org"))
+        assertFalse(Relay.usable("not a url"))
+    }
+
+    @Test
     fun `a pairing code reads as the connector prints it`() {
         val code = Relay.code("""{"code":"7K2Q9MXD","exp":1761200300,"url":"https://relay.withaster.dev/pair#1.ph_x.7K2Q9MXD.ABCD"}""")
         assertEquals("7K2Q9MXD", code.code)

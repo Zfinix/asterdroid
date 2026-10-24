@@ -868,16 +868,16 @@ class MainActivity : ComponentActivity() {
         loadClients()
     }
 
-    private fun loadClients() {
+    private fun loadClients(kept: String? = null) {
         loadingClients = true
-        clientsProblem = null
+        clientsProblem = kept
         thread(name = "aster-clients") {
             val reply = Relay.clients()
             runOnUiThread {
                 loadingClients = false
                 when (reply) {
                     is Relay.Reply.Ok -> clients = reply.value
-                    is Relay.Reply.Failed -> clientsProblem = reply.why
+                    is Relay.Reply.Failed -> clientsProblem = kept ?: reply.why
                 }
             }
         }
@@ -887,10 +887,7 @@ class MainActivity : ComponentActivity() {
         loadingClients = true
         thread(name = "aster-revoke") {
             val reply = Relay.revoke(id)
-            runOnUiThread {
-                if (reply is Relay.Reply.Failed) clientsProblem = reply.why
-                loadClients()
-            }
+            runOnUiThread { loadClients(kept = (reply as? Relay.Reply.Failed)?.why) }
         }
     }
 

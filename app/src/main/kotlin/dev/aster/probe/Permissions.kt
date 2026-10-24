@@ -65,7 +65,35 @@ object Permissions {
         context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
 
     /** How many of the verbs' permissions are still to give, for the row that offers them all. */
-    fun ungranted(context: Context): Int = runtime.count { !granted(context, it) }
+    fun ungranted(context: Context): Int = runtime.count { grantable(it) && !granted(context, it) }
+
+    /** Whether this Android version can grant it at all; the rest read as denied forever and would keep the row "Off". */
+    fun grantable(permission: String): Boolean {
+        val sdk = Build.VERSION.SDK_INT
+        return sdk >= (since[permission] ?: 0) && sdk <= (until[permission] ?: Int.MAX_VALUE)
+    }
+
+    private val since = mapOf(
+        P.ACCESS_MEDIA_LOCATION to Build.VERSION_CODES.Q,
+        P.ACTIVITY_RECOGNITION to Build.VERSION_CODES.Q,
+        P.ACCEPT_HANDOVER to Build.VERSION_CODES.P,
+        P.BLUETOOTH_SCAN to Build.VERSION_CODES.S,
+        P.BLUETOOTH_CONNECT to Build.VERSION_CODES.S,
+        P.BLUETOOTH_ADVERTISE to Build.VERSION_CODES.S,
+        P.UWB_RANGING to Build.VERSION_CODES.S,
+        P.NEARBY_WIFI_DEVICES to Build.VERSION_CODES.TIRAMISU,
+        P.POST_NOTIFICATIONS to Build.VERSION_CODES.TIRAMISU,
+        P.READ_MEDIA_IMAGES to Build.VERSION_CODES.TIRAMISU,
+        P.READ_MEDIA_VIDEO to Build.VERSION_CODES.TIRAMISU,
+        P.READ_MEDIA_AUDIO to Build.VERSION_CODES.TIRAMISU,
+        P.READ_MEDIA_VISUAL_USER_SELECTED to Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+    )
+
+    /** The manifest's maxSdkVersion for these. */
+    private val until = mapOf(
+        P.READ_EXTERNAL_STORAGE to Build.VERSION_CODES.S_V2,
+        P.WRITE_EXTERNAL_STORAGE to Build.VERSION_CODES.Q,
+    )
 
     /**
      * Android 13 greys out the accessibility switch for an app installed from
