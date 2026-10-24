@@ -87,6 +87,15 @@ test("a relay that points the token at another host is refused", async () => {
   await relay.close();
 });
 
+test("an https relay cannot send the token back over plain http or ws", () => {
+  const claim = { phone_id: `ph_${"a".repeat(26)}`, token: "ast_c_x", scopes: ["phone:use", "agent:chat"] };
+  const at = (/** @type {string} */ mcp, /** @type {string} */ acp) => ({ ...claim, endpoints: { mcp, acp } });
+  assert.throws(() => relayPhone(at("http://r.example/mcp", "wss://r.example/acp"), "https://r.example"), /in the clear/);
+  assert.throws(() => relayPhone(at("https://r.example/mcp", "ws://r.example/acp"), "https://r.example"), /in the clear/);
+  assert.equal(relayPhone(at("https://r.example/mcp", "wss://r.example/acp"), "https://r.example").acp?.url, "wss://r.example/acp");
+  assert.equal(relayPhone(at("http://127.0.0.1:8787/mcp", "ws://127.0.0.1:8787/acp"), "http://127.0.0.1:8787").mcp?.url, "http://127.0.0.1:8787/mcp");
+});
+
 test("relays must be https except on this computer, and LAN phones must be private", () => {
   assert.equal(relayOrigin("https://relay.withaster.dev/x"), "https://relay.withaster.dev");
   assert.equal(relayOrigin("http://127.0.0.1:8787"), "http://127.0.0.1:8787");

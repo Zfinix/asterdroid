@@ -164,17 +164,19 @@ export function relayPhone(/** @type {any} */ result, /** @type {string} */ orig
   }
   const token = String(result.token ?? "");
   if (!token.startsWith("ast_c_")) throw new Error("The relay sent back a pairing without a token.");
-  const host = new URL(origin).host;
+  const { host, protocol } = new URL(origin);
+  const secure = protocol === "https:";
   /** @param {unknown} url @param {string[]} schemes */
   const same = (url, schemes) => {
     if (typeof url !== "string") return null;
     const u = new URL(url);
-    if (u.host !== host || !schemes.includes(u.protocol)) throw new Error(`The relay pointed this computer at ${u.host}, not ${host}. Nothing was saved.`);
+    if (u.host !== host) throw new Error(`The relay pointed this computer at ${u.host}, not ${host}. Nothing was saved.`);
+    if (!schemes.includes(u.protocol)) throw new Error(`The relay offered ${u.protocol}// where it uses ${protocol}//, so the token would travel in the clear. Nothing was saved.`);
     return url;
   };
   const scopes = Array.isArray(result.scopes) ? result.scopes.map(String) : [];
-  const mcp = same(result.endpoints?.mcp, ["https:", "http:"]);
-  const acp = scopes.includes("agent:chat") ? same(result.endpoints?.acp, ["wss:", "ws:"]) : null;
+  const mcp = same(result.endpoints?.mcp, secure ? ["https:"] : ["https:", "http:"]);
+  const acp = scopes.includes("agent:chat") ? same(result.endpoints?.acp, secure ? ["wss:"] : ["wss:", "ws:"]) : null;
   /** @type {Phone} */
   const phone = {
     id: result.phone_id,
