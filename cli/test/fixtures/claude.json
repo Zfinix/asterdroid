@@ -1,0 +1,16 @@
+{
+  "numStartups": 12,
+  "mcpServers": {
+    "github": {
+      "type": "stdio",
+      "command": "gh-mcp",
+      "args": [],
+      "env": {}
+    }
+  },
+  "projects": {
+    "/Users/me/code": {
+      "allowedTools": []
+    }
+  }
+}
