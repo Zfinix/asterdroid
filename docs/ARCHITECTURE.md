@@ -41,6 +41,8 @@ The agent is exec'd from `nativeLibraryDir`, the one place Android will execute 
 | `AsterIme` | Text input for fields that reject `ACTION_SET_TEXT` |
 | `device-AGENTS.md` and `skills/` | Device instructions and task-specific guidance |
 
+Neither end is tied to Aster. `asterctl mcp` serves the same verbs to any MCP client, and `ASTER_AGENT_CMD` swaps the supervised agent for any command; [USING.md](USING.md#any-harness) has both.
+
 The service restarts the agent with backoff from 5 seconds to 5 minutes. Backoff increases when the process fails within a minute.
 
 `Install.kt` refreshes binaries, skills and instructions on every service start. It also recreates `aster` and `asterctl` symlinks in the app's private `bin` directory, pointing to executables in `nativeLibraryDir`. This preserves the executable targets' SELinux labels and updates the paths after reinstalls.

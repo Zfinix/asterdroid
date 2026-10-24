@@ -1,31 +1,61 @@
 <div align="center">
 
-<img src="docs/aster-logo.png" alt="asterdroid logo" width="88" />
+<img src="docs/aster-logo.png" alt="Droid logo" width="88" />
 
-# asterdroid
+# Droid
 
-**Your phone. One conversation.**
+**Your phone. Any agent.**
 
-Run the Aster agent on your Android. Send a message through Telegram,
-and let it work through your apps for you.
+An agent that uses your Android phone the way you do. Run it on any model,
+free and local ones included, drive the phone from any agent over MCP and ACP,
+and talk to it in the app, on Telegram, or on WhatsApp and iMessage through Photon.
 
-[![Release](https://img.shields.io/github/v/release/Zfinix/asterdroid?style=flat-square)](https://github.com/Zfinix/asterdroid/releases)
+[![Release](https://img.shields.io/github/v/release/Zfinix/asterdroid?style=flat-square)](https://github.com/Zfinix/asterdroid/releases/latest)
 [![Platform](https://img.shields.io/badge/platform-Android-green?style=flat-square&logo=android&logoColor=white)](https://www.android.com/)
 [![Arch](https://img.shields.io/badge/arch-arm64--v8a-blue?style=flat-square)](https://github.com/Zfinix/asterdroid)
 
-**[Website](https://droid.withaster.dev)** · [Releases](https://github.com/Zfinix/asterdroid/releases) · [Setup](docs/SETUP.md)
+**[Website](https://droid.withaster.dev)** · [Get the app](https://github.com/Zfinix/asterdroid/releases/latest) · [Setup](docs/SETUP.md)
 
-<img src="docs/mirror-wordle.png" alt="Telegram on the left, the phone's mirrored screen on the right" width="720" />
+<img src="docs/mirror-wordle.png" alt="A chat on the left, the phone's mirrored screen on the right" width="720" />
 
 </div>
 
 ---
 
-The app (`dev.aster.probe`) runs the full Aster agent on the phone. An accessibility service lets it read the screen, tap, swipe and type. You send instructions through Telegram and receive replies and screenshots.
+Droid (`dev.aster.probe`) gives an AI agent your phone's screen. An accessibility service lets it read, tap, swipe and type, in your apps, with your accounts.
 
-`build-agent.sh` cross-compiles `aster-cli` for `aarch64-linux-android` and packages it as `libaster.so`. It uses the same tools, skills, prompts and review path as the terminal version.
+- **Any model.** Free models with no account and no key, Ollama or LM Studio on your own computer, or a key for one of [40 providers](docs/PROVIDERS.md), such as OpenRouter, Gemini and NVIDIA.
+- **Any agent.** Claude Code, Codex, Cursor and any other MCP client use the phone's screen as a tool. Zed and JetBrains talk to the agent on the phone over ACP.
+- **Chat where you are.** In the Droid app, on Telegram, or on WhatsApp and iMessage through [Photon](https://photon.codes).
 
-**Status:** used as a daily driver, still experimental. Builds require an Aster checkout, support only `arm64-v8a`, and require broad device permissions.
+**Status:** used as a daily driver, still experimental. `arm64-v8a` only, and it needs broad device permissions.
+
+## Quick start
+
+1. Install the APK from the [latest release](https://github.com/Zfinix/asterdroid/releases/latest) and open it.
+2. Onboarding picks a model. **Try it free** needs no account and no key; you can also use a model on your computer or sign in with a provider.
+3. Choose where to talk to it: the chat in the app, Telegram, or Photon.
+4. Grant what it asks for: accessibility, the keyboard, notification access. Then say what you want done:
+
+```txt
+Open settings and turn on Do Not Disturb.
+```
+
+The free models run on a trial service that keeps logs, so keep them away from banking, health and other private screens. Use your own computer's model or a key for those.
+
+## Connect a computer
+
+MCP and ACP over USB, Wi-Fi or Tailscale are free and work today. In Droid, open **Connect a computer** and turn on Agents (MCP), Editors (ACP), or both. For Wi-Fi, also turn on Over Wi-Fi; for Tailscale, set Other agents' and Editors' address in settings to the phone's Tailscale address. Then on the computer:
+
+```sh
+npx @withaster/droid pair --adb               # phone on a USB cable
+npx @withaster/droid pair --lan 192.168.1.20  # phone on this Wi-Fi, or its Tailscale address
+npx @withaster/droid setup claude             # or codex, cursor, zed, jetbrains, vscode, all
+```
+
+`pair` asks for the keys Droid shows under Connect a computer. A bare `npx @withaster/droid pair` uses adb when it sees exactly one phone, and otherwise says how to pair over Wi-Fi. `setup` writes the config for each client. More in the [CLI README](cli/README.md).
+
+**Aster Relay is coming soon.** It will reach the phone from anywhere with one code, with no ports, adb or Tailscale. Until it opens, use USB, Wi-Fi or Tailscale. A relay you host yourself works now: see [Self-hosting](docs/RELAY.md#self-hosting).
 
 ## What it can do
 
@@ -52,7 +82,7 @@ Opens Settings, turns on Do Not Disturb, and lowers ring volume.
 
 ### It comes back on its own
 
-The agent schedules its own wake-ups, ends the turn, and returns when the timer fires. Rider checks, chunked recordings, anything that needs a later look. Manage them from Telegram with `/checkins` and `/cron`.
+The agent schedules its own wake-ups, ends the turn, and returns when the timer fires. Rider checks, chunked recordings, anything that needs a later look. Manage them from the chat with `/checkins` and `/cron`.
 
 ### Watch it work. Take over whenever.
 
@@ -60,25 +90,31 @@ Use `/mirror` to open your phone's live screen in a browser, over your LAN or Ta
 
 ### Your choice of model
 
-Connect a cloud provider or a local model server, and change the model and reasoning effort from chat. 40 providers with key pages in [docs/PROVIDERS.md](docs/PROVIDERS.md); Groq has a free tier, a local server needs no key.
+Start on free models with no key, connect a cloud provider, or use a model server on your own computer, and change the model and reasoning effort from chat. 40 providers with key pages in [docs/PROVIDERS.md](docs/PROVIDERS.md); a local server needs no key.
 
 <div align="center">
 
 <table>
   <tr>
     <td><img src="docs/shot-providers.jpg" alt="The provider picker: Baseten, DeepSeek, Fireworks AI, Google Gemini, Hugging Face Router, LM Studio, Ollama, OpenRouter and more" width="420" /></td>
-    <td><img src="docs/shot-settings.jpg" alt="The settings screen listing keys: Telegram token, provider keys, all masked" width="420" /></td>
+    <td><img src="docs/shot-settings.jpg" alt="The settings screen listing keys, all masked" width="420" /></td>
   </tr>
 </table>
 
 </div>
+
+### Bring your own agent
+
+The phone is not tied to the agent on it. Claude Code, Codex, Cursor, or any tool that speaks MCP can read and use the screen too, and Zed and JetBrains can chat with the phone's agent over ACP. Pair once and let `setup` write each client's config, as in [Connect a computer](#connect-a-computer). Your agent gets the same eyes and hands.
+
+You can also swap the agent that runs on the phone for your own command. Details in [docs/USING.md](docs/USING.md#any-harness).
 
 ### The little things, thought through
 
 - **Pick up a conversation**: list past sessions, resume your work, or start fresh
 - **Stop or try again**: cancel a running turn, retry the last message, see the queue
 - **See what happened**: agent status, tool activity, and transcripts in the app
-- **Choose who can ask**: set Allowed ids to your Telegram user id; the bot ignores everyone else
+- **Choose who can ask**: on Telegram, WhatsApp or iMessage, set Allowed people; the agent ignores everyone else
 
 <div align="center">
 
@@ -101,36 +137,25 @@ After a run it scores its own rounds, keeps the shortest path, and saves it as a
 
 </div>
 
-## Quick start
-
-Four steps, no compiler.
-
-1. Install the latest APK from [**Releases**](https://github.com/Zfinix/asterdroid/releases) and open it. Grant what it asks for: accessibility, notification access, Do Not Disturb.
-2. Create a Telegram bot with [@BotFather](https://t.me/BotFather) and copy the token.
-3. In the app's settings: paste the token, pick the provider, paste its key. Save. ([Providers](docs/PROVIDERS.md) has the full list and key pages; Groq has a free tier, a local server needs no key.)
-4. Press start, wait for **Connected to Telegram**, send `hello` to your bot. It replies with your numeric user id. Paste that id into **Allowed ids**, save, then send a real instruction:
-
-```txt
-Open settings and turn on Do Not Disturb.
-```
-
 ## Documentation
 
 | doc | what is in it |
 | --- | --- |
 | [SETUP](docs/SETUP.md) | Telegram bot setup in detail, pushed `.env`, configuration variables, troubleshooting |
 | [PROVIDERS](docs/PROVIDERS.md) | all 40 providers with key pages and env variables |
-| [USING](docs/USING.md) | chat commands, the control protocol, action receipts, the screen mirror |
+| [USING](docs/USING.md) | chat commands, the control protocol, action receipts, the screen mirror, other agents over MCP |
+| [CLI](cli/README.md) | `@withaster/droid`: pairing a computer, `setup` for each client, the stdio MCP and ACP bridges |
+| [RELAY](docs/RELAY.md) | the relay protocol, for Aster Relay (coming soon) or one you host |
 | [ARCHITECTURE](docs/ARCHITECTURE.md) | how it works, with a diagram |
 | [LICENSE](LICENSE) | Apache-2.0 |
 | [BUILDING](docs/BUILDING.md) | build from source, releases, CI, permissions, repository layout |
 
 ## The short version of how it works
 
-A foreground service runs `aster remote telegram` as a child process. The agent calls `asterctl`, which talks to `AsterA11yService` over an abstract Unix socket; the service reads accessibility trees, dispatches gestures and captures screenshots. Full detail in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+A foreground service runs the agent as a child process, with a bridge to Telegram or Photon when one is chosen. The agent calls `asterctl`, which talks to `AsterA11yService` over an abstract Unix socket; the service reads accessibility trees, dispatches gestures and captures screenshots. Other agents reach the same service through `asterctl mcp`, and editors reach the agent through `asterctl acp`. Full detail in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 <div align="center">
 
-<img src="docs/architecture.png" alt="Architecture: Telegram to the agent to asterctl to the accessibility service" width="640" />
+<img src="docs/architecture.png" alt="Architecture: the chat to the agent to asterctl to the accessibility service" width="640" />
 
 </div>
