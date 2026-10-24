@@ -116,7 +116,7 @@ object SetupLink {
         if (!NONCE.matches(nonce)) fail("This setup link is damaged.")
         if (nonce in seen) fail("This setup link was already used. Make a new one.")
         val relayUrl = json.optJSONObject("relay")?.optString("url")?.takeIf { it.isNotEmpty() }?.also {
-            if (!Lan.allowedUrl(it)) fail("The relay address in this link is not https, so Droid will not use it.")
+            if (!Relay.usable(it)) fail("The relay address in this link is not https, so Droid will not use it.")
         }?.takeIf(Relay::selfHosted)
         val mcp = json.optJSONObject("mcp")?.let { it.opt("on") as? Boolean }
         return Setup(

@@ -220,8 +220,12 @@ object Chat {
      * draws it, so nothing is added here unless the turn had already ended.
      */
     private fun steer(text: String) {
-        val id = session ?: return
-        val agent = client ?: return
+        val id = session
+        val agent = client
+        if (id == null || agent == null) {
+            unsent(text)
+            return
+        }
         thread(name = "aster-steer") {
             val prompt = JSONArray().put(JSONObject().put("type", "text").put("text", text))
             val params = JSONObject().put("sessionId", id).put("prompt", prompt)
@@ -229,8 +233,13 @@ object Chat {
             val steered = runCatching {
                 agent.call("session/prompt", params).optJSONObject("_meta")?.optBoolean("steered") == true
             }.getOrDefault(false)
-            if (!steered) main.post { send(text) }
+            if (!steered) main.post { if (busy) unsent(text) else send(text) }
         }
+    }
+
+    private fun unsent(text: String) {
+        val shown = if (text.length > 60) text.take(59) + "…" else text
+        add(Notice(key(), "Not sent: \"$shown\". Send it again once this turn ends.", error = true))
     }
 
     /**
