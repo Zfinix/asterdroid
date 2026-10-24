@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Connect to your phone</title>
+  <link rel="stylesheet" href="/pair.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="brand">Droid · Aster Relay</p>
+      <h1>Connect a computer to your phone</h1>
+      <p class="lede">In Droid, open <b>Reach from anywhere</b> and tap <b>Connect a computer</b>. Type the code it shows here. Your phone asks you to allow this computer before anything connects.</p>
+    </header>
+
+    <form id="claim" autocomplete="off">
+      <label for="code">Pairing code</label>
+      <input id="code" name="code" inputmode="text" autocapitalize="characters" spellcheck="false" maxlength="9" placeholder="7K2Q-9MXD" required>
+      <label for="name">What will use it</label>
+      <input id="name" name="name" maxlength="80" placeholder="Claude Code on my laptop">
+      <button type="submit" id="go">Connect</button>
+      <p id="status" role="status" aria-live="polite"></p>
+    </form>
+
+    <section id="done" hidden>
+      <h2>Connected</h2>
+      <p>Add the phone to your MCP client with one of these. The token is shown once; Droid can revoke it at any time.</p>
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <pre id="snippet" tabindex="0"></pre>
+      <button type="button" id="copy">Copy</button>
+      <dl>
+        <dt>MCP endpoint</dt><dd id="mcp"></dd>
+        <dt>ACP endpoint</dt><dd id="acp"></dd>
+        <dt>Allowed</dt><dd id="scopes"></dd>
+      </dl>
+    </section>
+
+    <footer>
+      <p>Traffic through the relay is protected by TLS between each end and the relay, not end to end: the relay operator could read what passes through. Self-host it if that matters to you. Nothing is stored except hashed tokens and client names.</p>
+    </footer>
+  </main>
+  <script src="/pair.js"></script>
+</body>
+</html>
