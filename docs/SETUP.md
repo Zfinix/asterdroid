@@ -63,7 +63,7 @@ EOF
 adb push .env /sdcard/Android/data/dev.aster.probe/files/.env
 ```
 
-The pushed values are merged with the phone's existing configuration. If you do not know your user ID yet, use steps 3 and 4 above to obtain and allow it.
+The pushed values are merged with the phone's existing configuration. On Android 10 and older the app deletes a pushed `.env` without reading it, because other apps with storage access can write that folder there; enter the values in the app instead. If you do not know your user ID yet, use steps 3 and 4 above to obtain and allow it.
 
 ## Configuration
 
@@ -75,6 +75,9 @@ The agent uses these environment variables:
 | `ASTER_REMOTE_USERS` | the settings sheet, or a pushed `.env` | comma-separated Telegram ids allowed to drive it |
 | `<PROVIDER>_API_KEY` | the settings sheet, or a pushed `.env` | whichever key the chosen provider wants |
 | `ASTER_BASE_URL`, `ASTER_MODEL`, `ASTER_EFFORT` | the app's pickers | the provider, model and effort for the next start |
+| `ASTER_AGENT_CMD` | a pushed `.env` or the raw editor | a shell command run in place of the bundled agent |
+| `ASTER_MCP_TOKEN` | a pushed `.env` or the raw editor | turns on the MCP server over HTTP; the bearer token clients send, 32 characters or more |
+| `ASTER_MCP_PORT`, `ASTER_MCP_BIND` | a pushed `.env` or the raw editor | where that server listens, `7071` and `127.0.0.1` by default |
 | `ASTER_COMPACT_BUDGET` | the service (60000) | limits context growth from repeated screen maps |
 | `HOME`, `TMPDIR`, `PATH` | the service | the app's private files, its cache, and `files/bin` |
 

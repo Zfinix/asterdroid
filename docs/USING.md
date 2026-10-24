@@ -289,3 +289,25 @@ To reach the mirror from the host without Telegram:
 adb shell "asterctl serve >/dev/null 2>&1 &"   # it blocks otherwise
 adb forward tcp:7071 tcp:7070                  # then open http://localhost:7071
 ```
+## Any harness
+
+The phone does not need the Aster agent to be driven. `asterctl mcp` is an MCP server with two tools: `phone`, which runs one verb and returns its reply, and `phone_screenshot`, which returns a PNG. The `phone` description carries the service's own `help`, and the android-use skill is served as the `asterdroid://skills/android-use` resource. Claude Code, Codex, Cursor, Hermes, or any other MCP client can use the phone the same way the on-phone agent does. `later` is the one verb that only wakes the Aster agent.
+
+Over HTTP, set `ASTER_MCP_TOKEN` in the phone's `.env` to at least 32 random characters (`openssl rand -hex 32`) and restart the agent. The service then runs `asterctl mcp --http` beside the agent and keeps it up. Every request needs `Authorization: Bearer <token>`; whoever holds the token controls the phone, including calls, messages and installs.
+
+It listens on `127.0.0.1:7071`, because plain HTTP carries the token in the clear. From a computer over USB:
+
+```sh
+adb forward tcp:7071 tcp:7071
+claude mcp add --transport http phone http://localhost:7071/mcp --header "Authorization: Bearer <token>"
+```
+
+To reach it over Tailscale, set `ASTER_MCP_BIND` to the phone's Tailscale address (or `0.0.0.0`) and connect to `http://<tailscale-ip>:7071/mcp`; Tailscale encrypts the traffic. Binding `0.0.0.0` on an untrusted Wi-Fi network exposes the token to anyone watching it. `ASTER_MCP_PORT` changes the port. Requests from a browser page on another origin are refused.
+
+Over stdio, with a debug build:
+
+```sh
+claude mcp add phone -- adb shell run-as dev.aster.probe files/bin/asterctl mcp
+```
+
+The other direction works too. `ASTER_AGENT_CMD` in `.env` replaces the bundled agent with any shell command, run through `/system/bin/sh -c` under the same supervisor, in `files/` with `AGENTS.md` beside it, `asterctl` on `PATH`, and every `.env` value except `LD_*` and `DYLD_*` names in its environment. Stopping the agent also stops whatever the command started. Android only executes files from the app's native library directory and the system, so the command has to be a system binary, a script those can run, or a binary shipped in `jniLibs`.
