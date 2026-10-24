@@ -1,0 +1,15 @@
+{
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "asterdroid-web",
+  "account_id": "e4a3fdbae140dc1895528888a3a723c5",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  "routes": [{ "pattern": "droid.withaster.dev", "custom_domain": true }],
+  "observability": {
+    "enabled": true
+  }
+}

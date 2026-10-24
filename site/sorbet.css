@@ -1,0 +1,124 @@
+/* Sorbet: a warm white page where six pastels share the work, each with a deep partner for text */
+:root:root { color-scheme: light;
+  --paper: #fcfcfa;
+  --ink: #151a26;
+  --ink-2: #4d5466;
+  --ink-3: #848a99;
+  --hair: #ececf0;
+  --mint: #d8f3e6; --mint-ink: #0f6446;
+  --butter: #fff2c2; --butter-ink: #7a5300;
+  --lilac: #e7e1ff; --lilac-ink: #4b3aa8;
+  --sky: #dceeff; --sky-ink: #1f5f9e;
+  --peach: #ffe3d6; --peach-ink: #a24a22;
+  --rose: #ffdde8; --rose-ink: #a3375e;
+  --navy: #151a26; --ink-2: #4d5466; --line: #ececf0; --mist: #f7f7fa; --blue-2: #4b3aa8;
+}
+html body { background: var(--paper); color: var(--ink); }
+
+/* hero: a pastel mesh on white */
+html .hero { color: var(--ink); background:
+  radial-gradient(40% 38% at 12% 14%, rgba(216, 243, 230, 0.95) 0%, rgba(216, 243, 230, 0) 70%),
+  radial-gradient(38% 36% at 86% 10%, rgba(231, 225, 255, 0.95) 0%, rgba(231, 225, 255, 0) 70%),
+  radial-gradient(34% 30% at 72% 52%, rgba(255, 221, 232, 0.8) 0%, rgba(255, 221, 232, 0) 70%),
+  radial-gradient(36% 32% at 24% 60%, rgba(255, 242, 194, 0.9) 0%, rgba(255, 242, 194, 0) 70%),
+  radial-gradient(45% 40% at 50% 96%, rgba(220, 238, 255, 0.95) 0%, rgba(220, 238, 255, 0) 70%),
+  var(--paper); }
+html .brand { color: var(--ink); }
+html .nav-pill { background: rgba(255, 255, 255, 0.7); box-shadow: inset 0 0 0 1px rgba(21, 26, 38, 0.06), 0 6px 18px -10px rgba(21, 26, 38, 0.25); }
+html .nav-pill a { color: var(--ink-2); }
+html .nav-gh svg { color: var(--ink); }
+html .hero-lede { color: var(--ink-2); }
+html .hero-fine { color: var(--ink-3); }
+html .eyebrow, html .eyebrow.light { color: var(--lilac-ink); }
+html .channel { color: rgba(21, 26, 38, 0.38); }
+html .channel[aria-selected="true"] { color: var(--ink); }
+html .rail { background: rgba(21, 26, 38, 0.1); }
+html .rail-fill { background: var(--lilac-ink); }
+html .task { color: var(--ink); background: linear-gradient(180deg, #fff 0%, #f3f3f6 100%); border-color: #e3e4ea; box-shadow: inset 0 1.5px 0 #fff, 0 1px 1px rgba(21, 26, 38, 0.05), 0 6px 14px -8px rgba(21, 26, 38, 0.25); }
+html .task[aria-selected="true"] { color: var(--lilac-ink); background: linear-gradient(180deg, #f3efff 0%, #dcd3ff 100%); border-color: #c8bcfa; box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.95), 0 8px 18px -8px rgba(75, 58, 168, 0.45); }
+html .store { border-color: #e3e4ea; box-shadow: inset 0 1.5px 0 #fff, 0 1px 1px rgba(21, 26, 38, 0.06), 0 16px 32px -14px rgba(21, 26, 38, 0.35); }
+html .floor-shadow { background: radial-gradient(closest-side, rgba(21, 26, 38, 0.22), transparent); }
+html .mascot-perch, html .mascot-finale, html .relay-mascot { filter: drop-shadow(0 16px 18px rgba(21, 26, 38, 0.18)); }
+
+/* bands and cards: a different pastel for each */
+html .band.mist { background: #f7f7fa; }
+html .band.white { background: var(--paper); }
+html .h2, html .h3 { color: var(--ink); }
+html .sub { color: var(--ink-2); }
+html .card { box-shadow: none; }
+html .bento .card:nth-child(1) { background: var(--mint); }
+html .bento .card:nth-child(2) { background: var(--butter); }
+html .bento .card:nth-child(3) { background: var(--lilac); }
+html .bento .card:nth-child(4) { background: var(--peach); }
+html .bento .card:nth-child(1) p { color: #2f5a48; }
+html .bento .card:nth-child(2) p { color: #6b5520; }
+html .bento .card:nth-child(3) p { color: #4c4677; }
+html .bento .card:nth-child(4) p { color: #7a4a34; }
+html .notif, html .skills li { background: rgba(255, 255, 255, 0.72); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 6px 16px -10px rgba(21, 26, 38, 0.25); }
+html .skills .mono { color: var(--lilac-ink); }
+html .receipt { background: #fff; color: var(--ink-2); box-shadow: 0 6px 16px -10px rgba(21, 26, 38, 0.25); }
+html .receipt b { color: var(--peach-ink); }
+html .pill-btn.primary { background: var(--ink); }
+html .card-blue { color: var(--ink); background: radial-gradient(60% 90% at 20% 30%, rgba(220, 238, 255, 1) 0%, rgba(220, 238, 255, 0) 70%), radial-gradient(60% 90% at 85% 70%, rgba(255, 221, 232, 1) 0%, rgba(255, 221, 232, 0) 70%), var(--lilac); }
+html .card-blue p { color: #4c4677; }
+html .card-blue .more { color: var(--lilac-ink); }
+html .pair-grid { display: none; }
+html .pair-code { color: var(--ink); background: rgba(255, 255, 255, 0.75); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 10px 28px -12px rgba(75, 58, 168, 0.35); }
+html .pair-code .dash { color: var(--lilac-ink); }
+html .new-badge { background: var(--ink); color: #fff; }
+html .lg-name { color: var(--ink); }
+
+/* chat apps: the dark phones sit on a sky-to-lilac mesh */
+html .band.blue { color: var(--ink); background:
+  radial-gradient(45% 55% at 12% 10%, rgba(220, 238, 255, 1) 0%, rgba(220, 238, 255, 0) 70%),
+  radial-gradient(45% 55% at 88% 15%, rgba(231, 225, 255, 1) 0%, rgba(231, 225, 255, 0) 70%),
+  radial-gradient(55% 55% at 50% 100%, rgba(216, 243, 230, 1) 0%, rgba(216, 243, 230, 0) 70%),
+  var(--paper); }
+html .sub.light { color: var(--ink-2); }
+html .fan4-item figcaption { color: var(--ink-2); }
+html .ios { box-shadow: inset 0 0 0 0.6px rgba(255, 255, 255, 0.75), inset 0 1.5px 1px rgba(255, 255, 255, 0.7), inset 0 -1.5px 1px rgba(90, 86, 80, 0.45), 0 2px 3px rgba(21, 26, 38, 0.12), 0 30px 50px -18px rgba(21, 26, 38, 0.35); }
+
+/* pricing and the close */
+html .plan { box-shadow: inset 0 0 0 1px var(--hair); background: #fff; }
+html .plan-blue { color: var(--ink); background: radial-gradient(70% 80% at 80% 0%, rgba(255, 221, 232, 1) 0%, rgba(255, 221, 232, 0) 70%), var(--lilac); box-shadow: 0 30px 60px -34px rgba(75, 58, 168, 0.5); }
+html .plan-blue .plan-price span, html .plan-blue .plan-for { color: #4c4677; }
+html .plan-blue ul { border-top-color: rgba(75, 58, 168, 0.18); }
+html .plan li::before { border-color: var(--mint-ink); }
+html .plan-blue li::before { border-color: var(--lilac-ink); }
+html .finale .fade-line { color: var(--ink-3); }
+html .copy-cmd { color: var(--ink); background: rgba(255, 255, 255, 0.7); box-shadow: inset 0 0 0 1px rgba(21, 26, 38, 0.08); }
+html .copy-cmd .dim { color: var(--lilac-ink); }
+html .footer { background: #f7f7fa; }
+html .term { box-shadow: 0 40px 80px -40px rgba(21, 26, 38, 0.5); }
+
+/* primary actions are lilac soft pills */
+html .store-badge, html .btn-lime, html .copy-btn { color: #4b3aa8; background: linear-gradient(180deg, #f3efff 0%, #dcd3ff 100%); border: 1px solid #c8bcfa; box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.95), 0 1px 1px rgba(21, 26, 38, 0.05), 0 8px 18px -8px rgba(75, 58, 168, 0.45); }
+html .store-badge { box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.95); }
+html .plan-blue .btn-lime { color: #4b3aa8; background: linear-gradient(180deg, #ffffff 0%, #f4f2fb 100%); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: inset 0 1.5px 0 #fff, 0 1px 1px rgba(21, 26, 38, 0.06), 0 10px 22px -10px rgba(75, 58, 168, 0.5); }
+
+/* one quiet primary: a solid ink pill, with the command as plain text beside it */
+html .store { height: 56px; padding: 0 26px 0 20px; gap: 10px; color: #fff; font-size: 17px; background: linear-gradient(180deg, #2a3042 0%, #151a26 100%); border: 1px solid #0c0f17;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 1px 2px rgba(21, 26, 38, 0.25), 0 14px 28px -14px rgba(21, 26, 38, 0.55); transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 200ms ease; }
+@media (hover: hover) and (pointer: fine) { html .store:hover { filter: none; background: linear-gradient(180deg, #343b50 0%, #1c2231 100%); } }
+html .store img { width: 20px; height: 20px; }
+html .cmd { display: inline-flex; align-items: center; gap: 10px; margin: 0; font-size: 15px; color: var(--ink-3); }
+html .cmd code { font: 500 14.5px/1 var(--mono); color: var(--ink); }
+html .cmd-copy { position: relative; width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; color: var(--ink-3); cursor: pointer; display: grid; place-items: center; transition: background-color 160ms ease, color 160ms ease, transform 140ms cubic-bezier(0.23, 1, 0.32, 1); }
+html .cmd-copy:active { transform: scale(0.92); }
+@media (hover: hover) and (pointer: fine) { html .cmd-copy:hover { background: rgba(21, 26, 38, 0.06); color: var(--ink); } }
+html .cmd-copy svg { position: absolute; width: 17px; height: 17px; transition: opacity 160ms ease, transform 200ms cubic-bezier(0.23, 1, 0.32, 1); }
+html .cmd-copy .i-done { opacity: 0; transform: scale(0.6); color: var(--mint-ink); }
+html .cmd-copy.done .i-copy { opacity: 0; transform: scale(0.6); }
+html .cmd-copy.done .i-done { opacity: 1; transform: scale(1); }
+html .finale .wrap { gap: 28px; }
+
+/* a white icon needs a hairline to hold its edge on a white page */
+html .brand-mark { box-shadow: 0 0 0 1px rgba(21, 26, 38, 0.08), 0 2px 6px rgba(21, 26, 38, 0.12); }
+html .notif-icon, html .n-av { box-shadow: 0 0 0 0.5px rgba(21, 26, 38, 0.1); }
+
+/* Relay is not live yet: the plan reads as a preview, its button does nothing */
+html .plan-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+html .soon-chip { height: 26px; padding: 0 11px; border-radius: 999px; display: inline-flex; align-items: center; font: 600 11.5px/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: #4b3aa8; background: rgba(255, 255, 255, 0.7); box-shadow: inset 0 0 0 1px rgba(75, 58, 168, 0.18); }
+html .btn-soon { cursor: default; color: rgba(75, 58, 168, 0.75); background: rgba(255, 255, 255, 0.45); border: 1px dashed rgba(75, 58, 168, 0.32); box-shadow: none; }
+html .btn-soon:active { transform: none; }
+html .plan-blue .plan-price { opacity: 0.55; }

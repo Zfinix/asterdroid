@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Droid</title>
+<meta name="description" content="Droid is a free, open source app that lets an AI agent use your Android, with your apps and your logins. Message it from any chat app, run any model, or plug in Claude Code.">
+<meta name="theme-color" content="#fcfcfa">
+<link rel="icon" type="image/png" href="/mascot/app-icon.png">
+<link rel="apple-touch-icon" href="/mascot/app-icon.png">
+<link rel="canonical" href="https://droid.withaster.dev/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Droid">
+<meta property="og:title" content="Droid: your phone, any agent">
+<meta property="og:description" content="A free, open source app that lets an AI agent use your Android, with your apps and your logins.">
+<meta property="og:url" content="https://droid.withaster.dev/">
+<meta property="og:image" content="https://droid.withaster.dev/mascot/app-icon.png">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Hanken+Grotesk:wght@400..700&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="ios.css">
+<link rel="stylesheet" href="sorbet.css">
+</head>
+<body>
+
+<header class="hero" id="top">
+  <nav class="nav" aria-label="Main">
+    <a class="brand" href="#top" aria-label="Droid home"><img class="brand-mark" src="mascot/app-icon.png" alt="" width="34" height="34"><span>Droid</span></a>
+    <div class="nav-pill">
+      <a href="#features">Features</a>
+      <a href="#agents">Agents</a>
+      <a href="#chats">Chat apps</a>
+      <a href="#pricing">Pricing</a>
+    </div>
+    <div class="nav-right">
+      <a class="nav-gh" href="https://github.com/Zfinix/asterdroid" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.4-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 2.9.8.1-.6.4-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5a3.9 3.9 0 0 1 1-2.7 3.6 3.6 0 0 1 .1-2.7s.8-.3 2.8 1a9.6 9.6 0 0 1 5 0c1.9-1.3 2.8-1 2.8-1a3.6 3.6 0 0 1 .1 2.7 3.9 3.9 0 0 1 1 2.7c0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5A10 10 0 0 0 12 2z"/></svg></a>
+      <a class="btn btn-lime btn-sm" href="#get">Get the app</a>
+    </div>
+  </nav>
+
+  <div class="hero-copy pre">
+    <h1 class="display">Your phone.<br>Any agent.</h1>
+    <p class="hero-lede">Droid is a free, open source app that lets an AI agent use your Android, with your apps and your logins. Message it from any chat app, run any model, or plug in Claude Code.</p>
+  </div>
+
+  <div class="hero-stage">
+    <div class="side side-left pre">
+      <p class="eyebrow light">Talk to it in</p>
+      <div class="channels" role="tablist" aria-label="Chat app">
+        <button class="channel" role="tab" data-channel="imessage" aria-selected="true"><span class="rail"><span class="rail-fill"></span></span>iMessage</button>
+        <button class="channel" role="tab" data-channel="whatsapp" aria-selected="false"><span class="rail"><span class="rail-fill"></span></span>WhatsApp</button>
+        <button class="channel" role="tab" data-channel="telegram" aria-selected="false"><span class="rail"><span class="rail-fill"></span></span>Telegram</button>
+      </div>
+    </div>
+
+    <div class="phone-scene">
+      <div class="mascot-perch pre" aria-hidden="true"><img src="mascot/bunny-hello.png" alt=""></div>
+      <div class="ios hero-ios pre" role="img" aria-label="Example conversation with Droid"><span class="ios-key l action"></span><span class="ios-key l vup"></span><span class="ios-key l vdown"></span><span class="ios-key r side"></span><span class="ios-key r camera"></span><div class="ios-screen"><div class="ios-ui app-imessage" data-app="imessage"></div></div><span class="ios-island"></span></div>
+      <div class="floor-shadow" aria-hidden="true"></div>
+    </div>
+
+    <div class="side side-right pre">
+      <p class="eyebrow light">Ask it to</p>
+      <div class="tasks" role="tablist" aria-label="Example task">
+        <button class="task" role="tab" data-task="food" aria-selected="true">Order dinner</button>
+        <button class="task" role="tab" data-task="delivery" aria-selected="false">Track the driver</button>
+        <button class="task" role="tab" data-task="music" aria-selected="false">Play focus music</button>
+        <button class="task" role="tab" data-task="remember" aria-selected="false">Remember a habit</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-cta">
+    <a class="store" href="#get"><img src="img/android.svg" alt="" width="22" height="22"><span>Get the app</span></a>
+    <p class="hero-fine">Android 8 and up. Apache-2.0. No account, no card, no key to try.</p>
+  </div>
+</header>
+
+<main>
+  <section class="band mist" id="features">
+    <div class="wrap">
+      <p class="eyebrow center">Features</p>
+      <h2 class="h2 center">Everything it needs.</h2>
+      <div class="bento">
+        <article class="card">
+          <div class="card-row">
+            <div class="card-text">
+              <h3 class="h3">Any model, even free</h3>
+              <p>Start with a free model and no account. Point it at Ollama or LM Studio on your laptop, or bring a key for any of 40 providers.</p>
+            </div>
+            <div class="icon-stack" aria-hidden="true">
+              <span class="app-icon"><img src="img/ollama.svg" alt=""></span>
+              <span class="app-icon"><img src="img/gemini.svg" alt=""></span>
+              <span class="app-icon"><img src="img/deepseek.svg" alt=""></span>
+              <span class="app-icon"><img src="img/claude.svg" alt=""></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h3 class="h3">Asks before it spends</h3>
+          <p>It stops for a yes before it pays for anything or messages someone as you.</p>
+          <div class="lock" aria-hidden="true">
+            <div class="lock-head"><span class="lock-date">Thursday 23 October</span><span class="lock-time">12:52</span></div>
+            <div class="lock-stack">
+              <div class="n n-back"><img class="n-av" src="mascot/avatar.png" alt=""><div class="n-txt"><div class="n-top"><b>Droid</b><span>1m ago</span></div><p>On it. Opening Uber Eats.</p></div></div>
+              <div class="n n-front"><span class="n-avwrap"><img class="n-av" src="mascot/avatar.png" alt=""><span class="n-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.2c4.9 0 8.8 3.2 8.8 7.2s-3.9 7.2-8.8 7.2c-.9 0-1.7-.1-2.5-.3L5.2 20l1-3.3C4.4 15.4 3.2 13.5 3.2 11.4c0-4 3.9-7.2 8.8-7.2z" fill="#fff"/></svg></span></span><div class="n-txt"><div class="n-top"><b>Droid</b><span>now</span></div><p>12pc Chicken Bucket for $21.99 on Uber Eats. Reply yes to place the order.</p></div></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h3 class="h3">Gets faster at your phone</h3>
+          <p>After a task it keeps the shortest path and saves it as a skill. The next time takes fewer steps.</p>
+          <ul class="skills" aria-hidden="true">
+            <li><span class="mono">/reorder-usual</span><span>Your usual, from Uber Eats</span></li>
+            <li><span class="mono">/quiet-mode</span><span>Do Not Disturb, ring low</span></li>
+            <li><span class="mono">/check-driver</span><span>Live map, every 8 minutes</span></li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3 class="h3">Every tap has a receipt</h3>
+          <p>Each action records what changed on screen, so you can see exactly what it did.</p>
+          <pre class="receipt" aria-hidden="true"><b>tap</b> "Place order"
+<b>changed</b> +32 -30 pkg=com.ubercab.eats after_ms=713
+<b>tap</b> "Track order"
+<b>changed</b> +11 -9 after_ms=402</pre>
+        </article>
+
+        <article class="card card-blue card-wide">
+          <div class="relay-visual" aria-hidden="true">
+            <div class="pair-code"><span>7K2Q</span><span class="dash">-</span><span>9MXD</span></div>
+            <img class="relay-mascot" src="mascot/bunny-wow.png" alt="" aria-hidden="true">
+            <div class="pair-grid"></div>
+          </div>
+          <div class="card-text">
+            <span class="new-badge">Coming soon</span>
+            <h3 class="h3">Reach it from anywhere</h3>
+            <p>Droid Relay will pair your computer with one code, from anywhere. No ports, no adb, no Tailscale.</p>
+            <a class="more" href="#pricing">See pricing ↗</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band white" id="agents">
+    <div class="wrap center">
+      <p class="eyebrow">Agents</p>
+      <h2 class="h2">Bring your own agent.</h2>
+      <p class="sub">Any MCP client gets the same eyes and hands as the built-in agent. Zed and JetBrains add Droid as an ACP agent.</p>
+    </div>
+    <div class="marquee" aria-label="Works with these agents">
+      <div class="marquee-track"><span class="lg" title="Claude Code"><img class="lg-mark" src="logos/claudecode-color.svg" alt=""><img class="lg-word" src="logos/claudecode-text.svg" alt="Claude Code"></span><span class="lg" title="Codex"><img class="lg-mark" src="logos/codex-color.svg" alt=""><img class="lg-word" src="logos/codex-text.svg" alt="Codex"></span><span class="lg" title="Cursor"><img class="lg-mark" src="logos/cursor.svg" alt=""><img class="lg-word" src="logos/cursor-text.svg" alt="Cursor"></span><span class="lg" title="GitHub Copilot"><img class="lg-mark" src="logos/githubcopilot.svg" alt=""><img class="lg-word" src="logos/githubcopilot-text.svg" alt="GitHub Copilot"></span><span class="lg" title="Gemini CLI"><img class="lg-mark" src="logos/geminicli-color.svg" alt=""><img class="lg-word" src="logos/geminicli-text.svg" alt="Gemini CLI"></span><span class="lg" title="Windsurf"><img class="lg-mark" src="logos/windsurf.svg" alt=""><img class="lg-word" src="logos/windsurf-text.svg" alt="Windsurf"></span><span class="lg" title="Zed"><img class="lg-mark" src="logos/zedindustries.svg" alt=""><span class="lg-name">Zed</span></span></div>
+      <div class="marquee-track reverse"><span class="lg" title="JetBrains"><img class="lg-mark" src="logos/jetbrains.svg" alt=""><span class="lg-name">JetBrains</span></span><span class="lg" title="Cline"><img class="lg-mark" src="logos/cline.svg" alt=""><img class="lg-word" src="logos/cline-text.svg" alt="Cline"></span><span class="lg" title="OpenCode"><img class="lg-mark" src="logos/opencode.svg" alt=""><img class="lg-word" src="logos/opencode-text.svg" alt="OpenCode"></span><span class="lg" title="Amp"><img class="lg-mark" src="logos/amp-color.svg" alt=""><img class="lg-word" src="logos/amp-text.svg" alt="Amp"></span><span class="lg" title="Kiro"><img class="lg-mark" src="logos/kiro-color.svg" alt=""><img class="lg-word" src="logos/kiro-text.svg" alt="Kiro"></span><span class="lg" title="Goose"><img class="lg-mark" src="logos/goose.svg" alt=""><img class="lg-word" src="logos/goose-text.svg" alt="Goose"></span><span class="lg" title="Roo Code"><img class="lg-mark" src="logos/roocode.svg" alt=""><img class="lg-word" src="logos/roocode-text.svg" alt="Roo Code"></span></div>
+    </div>
+    <div class="states" aria-label="Connected clients">
+      <span class="soft soft-mint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Claude Code connected</span>
+      <span class="soft soft-butter"><span class="ring" aria-hidden="true"></span>Cursor working…</span>
+      <span class="soft soft-grey"><span class="ring dashed" aria-hidden="true"></span>Zed not connected</span>
+      <span class="soft soft-white"><svg viewBox="0 0 24 24" fill="none" stroke="#c4554f" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg>Disconnect all</span>
+    </div>
+
+    <div class="duo">
+      <div class="term" aria-hidden="true">
+        <div class="term-bar"><i></i><i></i><i></i><span>claude · ~/</span></div>
+        <pre class="term-body"><span class="p">&gt;</span> play today's wordle on my phone and win
+
+<span class="t">●</span> phone <span class="d">open https://www.nytimes.com/games/wordle</span>
+  <span class="ok">receipt</span> <span class="d">opened Chrome, Wordle loaded</span>
+<span class="t">●</span> phone <span class="d">type CRANE, key enter</span>
+  <span class="ok">changed</span> <span class="d">+5 tiles: C gray, R yellow, A gray, N yellow, E green</span>
+<span class="t">●</span> Thinking about the next guess<span class="cursor"></span></pre>
+      </div>
+      <div class="device device-flat">
+        <div class="device-body">
+          <span class="key key-power"></span><span class="key key-volume"></span>
+          <div class="device-glass"><div class="display-area"><img src="img/mirror-phone.jpg" alt="Wordle on the phone, typed by Claude Code"></div></div>
+        </div>
+      </div>
+    </div>
+    <p class="duo-note">Pair once over USB or Wi-Fi with <code>npx @withaster/droid pair</code>, then <code>setup</code> writes the config for your client.</p>
+  </section>
+
+  <section class="band blue" id="chats">
+    <div class="wrap center">
+      <p class="eyebrow light">Chat apps</p>
+      <h2 class="h2">Talk to it anywhere.</h2>
+      <p class="sub light">The same agent on iMessage, WhatsApp and Telegram. What it learns comes along, whichever you use.</p>
+    </div>
+    <div class="fan4">
+      <figure class="fan4-item"><div class="ios"><span class="ios-key l action"></span><span class="ios-key l vup"></span><span class="ios-key l vdown"></span><span class="ios-key r side"></span><span class="ios-key r camera"></span><div class="ios-screen"><div class="ios-ui app-telegram" data-app="telegram"></div></div><span class="ios-island"></span></div><figcaption>Telegram</figcaption></figure>
+      <figure class="fan4-item"><div class="ios"><span class="ios-key l action"></span><span class="ios-key l vup"></span><span class="ios-key l vdown"></span><span class="ios-key r side"></span><span class="ios-key r camera"></span><div class="ios-screen"><div class="ios-ui app-whatsapp" data-app="whatsapp"></div></div><span class="ios-island"></span></div><figcaption>WhatsApp</figcaption></figure>
+      <figure class="fan4-item"><div class="ios"><span class="ios-key l action"></span><span class="ios-key l vup"></span><span class="ios-key l vdown"></span><span class="ios-key r side"></span><span class="ios-key r camera"></span><div class="ios-screen"><div class="ios-ui app-imessage" data-app="imessage"></div></div><span class="ios-island"></span></div><figcaption>iMessage</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="band mist" id="pricing">
+    <div class="wrap center">
+      <p class="eyebrow">Pricing</p>
+      <h2 class="h2">Free on your phone.</h2>
+      <p class="sub">A rented cloud phone starts at $20 a month and makes you sign in to everything again. Yours is already signed in.</p>
+      <div class="plans">
+        <article class="plan">
+          <h3 class="h3">Droid</h3>
+          <p class="plan-price">$0</p>
+          <p class="plan-for">Everything, on your own phone.</p>
+          <ul>
+            <li>The built-in agent, on your phone</li>
+            <li>Any model, including local and free ones</li>
+            <li>MCP and ACP over USB, Wi-Fi or Tailscale</li>
+            <li>Telegram, WhatsApp and iMessage</li>
+          </ul>
+          <a class="btn btn-ink" href="#get">Get the app</a>
+        </article>
+        <article class="plan plan-blue">
+          <div class="plan-title"><h3 class="h3">Relay</h3><span class="soon-chip">Coming soon</span></div>
+          <p class="plan-price">$5<span>/month</span></p>
+          <p class="plan-for">Reach your phone from anywhere.</p>
+          <ul>
+            <li>Pair a computer with one code</li>
+            <li>A stable HTTPS address for MCP and ACP</li>
+            <li>No ports, no adb, no Tailscale</li>
+            <li>See and revoke every client</li>
+          </ul>
+          <span class="btn btn-soon" aria-disabled="true">Coming soon</span>
+        </article>
+      </div>
+      <p class="plans-note">Until Relay launches, Droid connects to your computer for free over USB, Wi-Fi or Tailscale.</p>
+    </div>
+  </section>
+
+  <section class="band white" id="faq">
+    <div class="wrap narrow">
+      <p class="eyebrow center">Support</p>
+      <h2 class="h2 center">Questions, answered.</h2>
+      <div class="faq">
+        <details class="qa is-open" open><summary>Is it really free?<span class="plus" aria-hidden="true"></span></summary><div class="qa-a"><p>Yes. The app and the agent are Apache-2.0. Relay, coming soon, will be an optional $5 a month. You only pay a model provider if you pick a paid one.</p></div></details>
+        <details class="qa"><summary>Do I need to root my phone?<span class="plus" aria-hidden="true"></span></summary><div class="qa-a"><p>No. Droid reads the screen and taps through Android's accessibility service. You install it as an APK from GitHub.</p></div></details>
+        <details class="qa"><summary>What does the model see?<span class="plus" aria-hidden="true"></span></summary><div class="qa-a"><p>The screen text and the screenshots the agent asks for. With the model on your own laptop, that stays on your network. With a cloud model, it goes to that provider.</p></div></details>
+        <details class="qa"><summary>Will it spend my money or message people?<span class="plus" aria-hidden="true"></span></summary><div class="qa-a"><p>Not without asking. It stops for a yes before it pays for anything or messages someone as you.</p></div></details>
+        <details class="qa"><summary>Does it work on iPhone?<span class="plus" aria-hidden="true"></span></summary><div class="qa-a"><p>Not yet. Android comes first.</p></div></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="band blue finale" id="get">
+    <div class="wrap center">
+      <div class="mascot-finale" aria-hidden="true"><img src="mascot/bunny-thumbs.png" alt=""></div>
+      <h2 class="display small">A little more done.<br><span class="fade-line">A little less tapping.</span></h2>
+      <a class="store" href="https://github.com/Zfinix/asterdroid/releases/latest"><img src="img/android.svg" alt="" width="22" height="22"><span>Get the app</span></a>
+      <p class="cmd"><span class="cmd-lead">or pair your agent</span><code>npx @withaster/droid pair</code><button class="cmd-copy" type="button" aria-label="Copy command"><svg class="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7.5a2 2 0 0 0 2 2h2.5"/></svg><svg class="i-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-made"><img class="brand-mark big" src="mascot/app-icon.png" alt="" width="44" height="44"><p><strong>Made by Aster.</strong><br><span>An open source agent that works where you do.</span></p></div>
+    <nav aria-label="Footer"><a href="https://github.com/Zfinix/asterdroid">GitHub</a><a href="https://github.com/Zfinix/asterdroid/tree/main/docs">Docs</a><a href="https://github.com/Zfinix/asterdroid/releases">Releases</a><a href="https://github.com/Zfinix/asterdroid/blob/main/LICENSE">Apache-2.0</a></nav>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

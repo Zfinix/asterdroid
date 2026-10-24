@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Droid setup link</title>
+<meta name="description" content="A Droid setup link. Open it on your Android phone with Droid installed.">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#fcfcfa">
+<link rel="icon" type="image/png" href="/mascot/app-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Hanken+Grotesk:wght@400..700&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/sorbet.css">
+<link rel="stylesheet" href="/page.css">
+</head>
+<body class="page">
+
+<header class="hero">
+  <nav class="nav" aria-label="Main">
+    <a class="brand" href="/" aria-label="Droid home"><img class="brand-mark" src="/mascot/app-icon.png" alt="" width="34" height="34"><span>Droid</span></a>
+    <a class="btn btn-lime btn-sm" href="https://github.com/Zfinix/asterdroid/releases/latest">Get the app</a>
+  </nav>
+
+  <main class="page-body">
+    <img class="mascot" src="/mascot/bunny-point.png" alt="" width="168" height="168">
+
+    <div id="link" hidden>
+      <h1 class="display">Open this on your phone</h1>
+    </div>
+    <div id="nolink">
+      <h1 class="display">Setup links</h1>
+    </div>
+
+    <p class="page-lede" data-when="desktop">This is a Droid setup link. It sets up the app on an Android phone, so it does nothing on a computer. Send the link to your phone, or scan its QR code with the phone's camera.</p>
+    <p class="page-lede" data-when="android" hidden>This is a Droid setup link, but Droid is not installed on this phone yet. Install it, then open the link again and Droid will show what it sets up before it changes anything.</p>
+    <p class="page-lede" data-when="none" hidden>A setup link brings a whole Droid setup to your phone in one tap: the model, its key and the chat app you talk to it in. This one has no setup in it, so there is nothing to open. Use the full link you were given, on your phone.</p>
+
+    <ol class="page-steps" data-when="steps">
+      <li><span>Install Droid on your Android phone from the <a href="https://github.com/Zfinix/asterdroid/releases/latest">latest GitHub release</a>.</span></li>
+      <li><span>Open this same link on that phone. Droid opens it instead of the browser.</span></li>
+      <li><span>Check what the link sets up, then confirm it in Droid.</span></li>
+    </ol>
+
+    <div class="page-actions">
+      <a class="store" href="https://github.com/Zfinix/asterdroid/releases/latest"><img src="/img/android.svg" alt="" width="22" height="22"><span>Get the app</span><span class="store-badge">GitHub</span></a>
+    </div>
+
+    <p class="page-note">The setup rides after the <code>#</code> in the link, which the browser never sends to this site. Nothing in it is sent to or stored by this site.</p>
+  </main>
+</header>
+
+<script>
+(() => {
+  const hasLink = /^#1\.\S+$/.test(location.hash);
+  const android = /Android/i.test(navigator.userAgent);
+  const when = !hasLink ? 'none' : android ? 'android' : 'desktop';
+  document.getElementById('link').hidden = !hasLink;
+  document.getElementById('nolink').hidden = hasLink;
+  for (const el of document.querySelectorAll('[data-when]')) {
+    const key = el.dataset.when;
+    el.hidden = key === 'steps' ? !hasLink : key !== when;
+  }
+})();
+</script>
+</body>
+</html>
