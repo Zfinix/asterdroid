@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "dev.aster.probe",
+      "sha256_cert_fingerprints": [
+        "D7:15:9C:E3:3F:94:86:E2:61:3A:FA:E1:F4:E0:85:2B:E4:65:C2:88:6B:0A:B2:F0:1B:13:A2:86:AE:56:3E:91"
+      ]
+    }
+  }
+]

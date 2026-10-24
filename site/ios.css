@@ -1,0 +1,156 @@
+/* iPhone 16 Pro Max, drawn to its real geometry: a 77.6 x 163 mm body (1407 x 2956 at 3x), a 1320 x 2868 display
+   inset 43 px, a 362 x 108 Dynamic Island, five keys. The screen is laid out in iOS points (440 x 956) and scaled in. */
+.ios { --w: 290px; --s: 0.6184; position: relative; width: var(--w); aspect-ratio: 1407 / 2956; border-radius: 20.1% / 9.57%;
+  background: linear-gradient(90deg, #8f8b85 0%, #e9e6e0 1.6%, #c8c4bd 4%, #d6d2cb 50%, #c4c0b9 96%, #ece9e3 98.4%, #8b8781 100%);
+  box-shadow: inset 0 0 0 0.6px rgba(255, 255, 255, 0.75), inset 0 1.5px 1px rgba(255, 255, 255, 0.7), inset 0 -1.5px 1px rgba(90, 86, 80, 0.45),
+    0 2px 3px rgba(6, 40, 28, 0.2), 0 30px 50px -18px rgba(6, 40, 28, 0.55); }
+.ios::before { content: ""; position: absolute; left: 1.28%; right: 1.28%; top: 0.61%; bottom: 0.61%; border-radius: 19.33% / 9.08%; background: #040404; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06); }
+.ios-screen { position: absolute; left: 3.06%; right: 3.06%; top: 1.49%; bottom: 1.49%; border-radius: 18.18% / 8.37%; overflow: hidden; background: #fff; z-index: 1; }
+.ios-screen::after { content: ""; position: absolute; inset: 0; z-index: 8; pointer-events: none; border-radius: inherit; background: linear-gradient(118deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 30%); }
+.ios-island { position: absolute; z-index: 4; left: 37.13%; top: 2.94%; width: 25.73%; height: 3.65%; border-radius: 999px; background: #000; }
+.ios-island::after { content: ""; position: absolute; right: 13%; top: 50%; width: 22%; aspect-ratio: 1; transform: translateY(-50%); border-radius: 50%; background: radial-gradient(circle at 40% 38%, #1d2440 0, #07080e 45%, #000 70%); }
+.ios-key { position: absolute; width: 0.9%; border-radius: 2px; background: linear-gradient(90deg, #8f8b85, #dcd8d1 55%, #a9a59e); box-shadow: 0 0 0 0.4px rgba(60, 56, 50, 0.45); }
+.ios-key.l { left: -0.62%; }
+.ios-key.r { right: -0.62%; }
+.ios-key.action { top: 18.84%; height: 4.19%; }
+.ios-key.vup { top: 26.18%; height: 6.87%; }
+.ios-key.vdown { top: 34.88%; height: 6.87%; }
+.ios-key.side { top: 28.55%; height: 10.83%; }
+.ios-key.camera { right: 0; width: 0.5%; top: 51%; height: 8.4%; border-radius: 2px; background: linear-gradient(90deg, #5d5a55, #8a867f); box-shadow: inset 0 0 0 0.4px rgba(0, 0, 0, 0.4); }
+.ios-ui { position: absolute; left: 0; top: 0; width: 440px; height: 956px; transform-origin: 0 0; transform: scale(var(--s)); font-family: -apple-system, "SF Pro Text", "SF Pro", system-ui, sans-serif; -webkit-font-smoothing: antialiased; color: #000; display: flex; flex-direction: column; overflow: hidden; }
+
+/* iOS 26, dark: Liquid Glass controls float over the conversation */
+.ios-ui { background: #000; color: #fff; }
+.i-status { position: absolute; z-index: 6; left: 0; right: 0; top: 0; height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 4px 30px 0 60px; font: 600 17px/1 -apple-system, "SF Pro Text", system-ui; letter-spacing: -0.3px; color: #fff; }
+.i-status .r { display: flex; align-items: center; gap: 7px; }
+.i-batt { position: relative; height: 13.5px; min-width: 27px; padding: 0 3px; border-radius: 4.3px; background: #fff; color: #000; font: 700 11.5px/13.5px -apple-system, system-ui; text-align: center; letter-spacing: -0.3px; }
+.i-batt::after { content: ""; position: absolute; right: -3px; top: 4.6px; width: 1.7px; height: 4.4px; border-radius: 0 1px 1px 0; background: rgba(255, 255, 255, 0.55); }
+.i-home { position: absolute; z-index: 9; left: 50%; bottom: 8px; width: 146px; height: 5px; margin-left: -73px; border-radius: 3px; background: #fff; }
+.g { background: rgba(46, 46, 48, 0.62); -webkit-backdrop-filter: blur(16px) saturate(170%); backdrop-filter: blur(16px) saturate(170%);
+  box-shadow: inset 0 0 0 0.6px rgba(255, 255, 255, 0.16), inset 0 1px 0.5px rgba(255, 255, 255, 0.14), inset 0 -1px 1px rgba(0, 0, 0, 0.25), 0 6px 18px rgba(0, 0, 0, 0.38); }
+.i-circ { position: absolute; z-index: 7; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: #fff; }
+.i-cap { position: absolute; z-index: 7; height: 44px; border-radius: 22px; display: flex; align-items: center; color: #fff; }
+.i-scroll { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 120px 16px 96px; gap: 4px; }
+.i-fade { position: absolute; z-index: 5; left: 0; right: 0; top: 0; height: 150px; background: linear-gradient(180deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.6) 55%, rgba(0, 0, 0, 0) 100%); pointer-events: none; }
+.i-avatar { border-radius: 50%; display: block; }
+.mt { margin-top: 10px; }
+.tm { float: right; display: inline-flex; align-items: center; gap: 3px; margin: 9px -2px -4px 10px; font-size: 12px; letter-spacing: 0; }
+.tm svg { width: 17px; height: 11px; }
+
+/* iMessage */
+.app-imessage .im-back { left: 20px; top: 60px; padding: 0 8px 0 13px; gap: 6px; }
+.app-imessage .im-badge { min-width: 30px; height: 25px; padding: 0 9px; border-radius: 13px; background: #fff; color: #000; font: 600 15px/25px -apple-system, system-ui; text-align: center; }
+.app-imessage .im-avatar { position: absolute; z-index: 8; left: 50%; top: 56px; width: 60px; height: 60px; margin-left: -30px; }
+.app-imessage .im-name { left: 50%; top: 110px; height: 34px; transform: translateX(-50%); padding: 0 12px 0 16px; gap: 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.4px; z-index: 7; }
+.app-imessage .im-name svg { opacity: 0.45; }
+.app-imessage .im-video { right: 20px; top: 60px; }
+.app-imessage .i-scroll { padding-top: 160px; }
+.app-imessage .stamp { align-self: center; margin: 8px 0 6px; font-size: 12.5px; color: #8e8e93; }
+.app-imessage .stamp b { font-weight: 600; }
+.imb { position: relative; max-width: 72%; padding: 9px 15px 10px; border-radius: 21px; font-size: 17px; line-height: 22px; letter-spacing: -0.4px; }
+.imb.me { align-self: flex-end; background: #4f96f6; }
+.imb.them { align-self: flex-start; background: #262629; }
+.imb.last.me { border-bottom-right-radius: 7px; }
+.imb.last.them { border-bottom-left-radius: 7px; }
+.imb.last::after { content: ""; position: absolute; bottom: 0; width: 14px; height: 14px; }
+.imb.last.me::after { right: -4px; background: radial-gradient(circle at 0 0, transparent 9.5px, #4f96f6 10px); clip-path: polygon(0 0, 100% 100%, 0 100%); }
+.imb.last.them::after { left: -4px; background: radial-gradient(circle at 100% 0, transparent 9.5px, #262629 10px); clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+.im-delivered { align-self: flex-end; margin: -1px 4px 4px 0; font-size: 12px; font-weight: 500; color: #8e8e93; }
+.app-imessage .im-plus { left: 29px; bottom: 30px; width: 40px; height: 40px; }
+.app-imessage .im-field { left: 80px; right: 30px; bottom: 30px; height: 40px; padding: 0 12px 0 16px; justify-content: space-between; color: #8e8e93; font-size: 17px; letter-spacing: -0.4px; }
+
+/* WhatsApp */
+.app-whatsapp { background: #0b0b0b url(img/wa-dark.jpg) center / cover; }
+.app-whatsapp .wa-bar { position: absolute; z-index: 5; left: 0; right: 0; top: 0; height: 112px; background: #121212; }
+.app-whatsapp .wa-back { left: 20px; top: 60px; background: #313131; }
+.app-whatsapp .wa-avatar { position: absolute; z-index: 7; left: 74px; top: 62px; width: 40px; height: 40px; }
+.app-whatsapp .wa-who { position: absolute; z-index: 7; left: 124px; top: 63px; display: flex; flex-direction: column; gap: 1px; }
+.app-whatsapp .wa-who strong { font-size: 17px; font-weight: 600; letter-spacing: -0.4px; }
+.app-whatsapp .wa-who small { font-size: 13px; color: #8e8e93; }
+.app-whatsapp .wa-calls { right: 20px; top: 60px; width: 102px; justify-content: space-around; padding: 0 6px; background: #2f2f2f; }
+.app-whatsapp .i-scroll { padding: 124px 14px 116px; gap: 3px; }
+.wa-day { align-self: center; margin: 4px 0 10px; padding: 5px 12px; border-radius: 9px; background: #1d1f1f; color: #c5c9cb; font-size: 13px; font-weight: 500; }
+.wab { position: relative; max-width: 80%; padding: 8px 12px 8px 13px; border-radius: 18px; font-size: 17px; line-height: 22px; letter-spacing: -0.4px; }
+.wab.me { align-self: flex-end; background: #264c39; }
+.wab.them { align-self: flex-start; background: #242626; }
+.wab.last.me { border-bottom-right-radius: 5px; }
+.wab.last.them { border-bottom-left-radius: 5px; }
+.wab.last::after { content: ""; position: absolute; bottom: 0; width: 12px; height: 12px; }
+.wab.last.me::after { right: -6px; background: radial-gradient(circle at 0 0, transparent 8px, #264c39 8.5px); clip-path: polygon(0 0, 100% 100%, 0 100%); }
+.wab.last.them::after { left: -6px; background: radial-gradient(circle at 100% 0, transparent 8px, #242626 8.5px); clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+.wab .tm { color: rgba(255, 255, 255, 0.55); }
+.wab.me .tm svg { color: #53bdeb; }
+.app-whatsapp .wa-compose { position: absolute; z-index: 6; left: 0; right: 0; bottom: 0; height: 106px; background: #101010; }
+.app-whatsapp .wa-plus { position: absolute; z-index: 7; left: 24px; bottom: 48px; color: #fff; }
+.app-whatsapp .wa-field { position: absolute; z-index: 7; left: 62px; right: 108px; bottom: 42px; height: 36px; border-radius: 18px; background: #282828; display: flex; align-items: center; justify-content: flex-end; padding: 0 10px; color: #fff; }
+.app-whatsapp .wa-cam { position: absolute; z-index: 7; right: 66px; bottom: 49px; color: #fff; }
+.app-whatsapp .wa-mic { position: absolute; z-index: 7; right: 22px; bottom: 43px; width: 34px; height: 34px; border-radius: 50%; background: #21c063; color: #0b0b0b; display: grid; place-items: center; }
+
+/* Telegram, night theme */
+.app-telegram { background: #050409 url(img/tg-dark.jpg) center / cover; }
+.app-telegram .tg-back { left: 16px; top: 64px; }
+.app-telegram .tg-name { left: 50%; top: 64px; width: 180px; margin-left: -90px; flex-direction: column; justify-content: center; gap: 1px; }
+.app-telegram .tg-name strong { font-size: 17px; font-weight: 600; letter-spacing: -0.4px; line-height: 20px; }
+.app-telegram .tg-name small { font-size: 13px; color: #a7a2b3; line-height: 16px; }
+.app-telegram .tg-avatar { position: absolute; z-index: 7; right: 16px; top: 64px; width: 44px; height: 44px; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85), 0 6px 16px rgba(0, 0, 0, 0.4); }
+.app-telegram .i-scroll { padding: 130px 10px 100px; gap: 4px; }
+.tg-day { align-self: center; margin: 6px 0 8px; padding: 4px 12px; border-radius: 13px; background: #201c29; color: #fff; font-size: 14px; font-weight: 600; }
+.tgb { position: relative; max-width: 82%; padding: 8px 12px 7px 13px; border-radius: 18px; font-size: 17px; line-height: 22px; letter-spacing: -0.4px; }
+.tgb.me { align-self: flex-end; background: linear-gradient(160deg, #7c55e6 0%, #5662f5 100%); }
+.tgb.them { align-self: flex-start; background: rgba(50, 35, 51, 0.92); }
+.tgb.last.me { border-bottom-right-radius: 6px; }
+.tgb.last.them { border-bottom-left-radius: 6px; }
+.tgb .tm { color: #9c94a6; }
+.tgb.me .tm { color: rgba(255, 255, 255, 0.72); }
+.tg-keys { align-self: flex-start; width: 82%; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin: 1px 0 4px; }
+.tg-keys span { height: 42px; border-radius: 13px; display: grid; place-items: center; font-size: 15px; font-weight: 600; letter-spacing: -0.2px; color: #fff; background: rgba(58, 48, 70, 0.9); box-shadow: inset 0 0 0 0.6px rgba(255, 255, 255, 0.14), inset 0 1px 0.5px rgba(255, 255, 255, 0.12), 0 4px 12px rgba(0, 0, 0, 0.3); }
+.app-telegram .tg-menu { left: 22px; bottom: 30px; width: 40px; height: 40px; background: #5186ef; }
+.app-telegram .tg-clip { left: 68px; bottom: 30px; width: 40px; height: 40px; }
+.app-telegram .tg-field { left: 114px; right: 22px; bottom: 30px; height: 40px; padding: 0 4px 0 16px; justify-content: space-between; color: #8e8e93; font-size: 17px; letter-spacing: -0.4px; }
+.app-telegram .tg-field .e { margin-left: auto; margin-right: 10px; color: #8e8e93; display: grid; }
+.app-telegram .tg-send { width: 32px; height: 32px; border-radius: 50%; background: #5186ef; display: grid; place-items: center; color: #fff; }
+
+/* Droid's own chat in the same iOS 26 language */
+.app-droid { background: radial-gradient(80% 50% at 20% 10%, #1d5a45 0%, rgba(29, 90, 69, 0) 70%), #0b241c; }
+.app-droid .d-name { left: 20px; right: 20px; top: 66px; padding: 0 14px 0 6px; gap: 10px; }
+.app-droid .d-name img { width: 34px; height: 34px; }
+.app-droid .d-name strong { display: block; font-size: 16px; font-weight: 600; line-height: 19px; }
+.app-droid .d-name small { font-size: 12.5px; color: #ffd866; line-height: 15px; }
+.app-droid .i-scroll { padding-top: 130px; }
+.ddb { max-width: 80%; padding: 9px 14px 10px; border-radius: 20px; font-size: 17px; line-height: 22px; letter-spacing: -0.4px; }
+.ddb.me { align-self: flex-end; background: #ffd866; color: #0e2e24; border-bottom-right-radius: 7px; }
+.ddb.them { align-self: flex-start; background: rgba(35, 64, 58, 0.92); border-bottom-left-radius: 7px; }
+.d-chip { align-self: center; display: inline-flex; align-items: center; gap: 6px; margin: 6px 0; padding: 6px 13px; border-radius: 999px; font-size: 13.5px; font-weight: 500; color: #cfeadd; }
+.d-chip svg { width: 13px; height: 13px; }
+.d-acts { display: flex; gap: 8px; margin-top: 10px; }
+.d-acts span { height: 38px; padding: 0 15px; border-radius: 19px; display: inline-flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; }
+.d-acts .yes { background: #ffd866; color: #0e2e24; }
+.d-acts .no { color: rgba(255, 255, 255, 0.6); }
+.app-droid .d-field { left: 22px; right: 22px; bottom: 30px; height: 44px; padding: 0 5px 0 18px; justify-content: space-between; color: #8fb5a5; font-size: 17px; }
+.app-droid .d-send { width: 34px; height: 34px; border-radius: 50%; background: #ffd866; color: #0e2e24; display: grid; place-items: center; }
+
+/* live hero conversation */
+.i-track { display: flex; flex-direction: column; gap: inherit; will-change: transform; }
+.pop { animation: pop-in 420ms cubic-bezier(0.23, 1, 0.32, 1) both; }
+.pop.me { transform-origin: 100% 100%; }
+.pop.them, .pop.typing { transform-origin: 0 100%; }
+@keyframes pop-in { from { opacity: 0; transform: translateY(14px) scale(0.9); } }
+.imb.typing { display: inline-flex; gap: 5px; padding: 13px 15px; }
+.imb.typing i { width: 8px; height: 8px; border-radius: 50%; background: #8e8e93; animation: dot 1.1s infinite ease-in-out; }
+.imb.typing i:nth-child(2) { animation-delay: 0.15s; }
+.imb.typing i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes dot { 0%, 70%, 100% { opacity: 0.35; transform: translateY(0); } 35% { opacity: 1; transform: translateY(-2px); } }
+.typed { color: #fff; white-space: nowrap; }
+.typed::after { content: ""; display: inline-block; width: 2px; height: 20px; margin-left: 1px; vertical-align: -4px; border-radius: 1px; background: #4f96f6; animation: caret 1s steps(1) infinite; }
+.app-whatsapp .typed::after { background: #21c063; }
+.app-telegram .typed::after { background: #5186ef; }
+@keyframes caret { 50% { opacity: 0; } }
+.im-send { width: 30px; height: 30px; border-radius: 50%; background: #4f96f6; color: #fff; display: grid; place-items: center; margin-right: -6px; animation: pop-in 220ms cubic-bezier(0.23, 1, 0.32, 1) both; }
+.wa-field .typed-host { margin-right: auto; padding-left: 4px; font-size: 17px; letter-spacing: -0.4px; }
+.press { transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1), filter 120ms ease; transform: scale(0.9); filter: brightness(1.25); }
+.tg-keys span { animation: pop-in 320ms cubic-bezier(0.23, 1, 0.32, 1) both; transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease; }
+.tg-keys span:nth-child(2) { animation-delay: 60ms; }
+.tg-keys span.hit { transform: scale(0.96); background: rgba(81, 134, 239, 0.75); }
+.tg-keys.gone { opacity: 0; transform: translateY(-6px); transition: opacity 200ms ease-out, transform 200ms ease-out; }
+.sub-swap { animation: sub-in 240ms ease-out both; }
+@keyframes sub-in { from { opacity: 0; transform: translateY(3px); } }
