@@ -28,12 +28,12 @@ class MirrorService : Service() {
         val started = runCatching {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 startForeground(
-                    NOTIFICATION_ID,
+                    NotificationIds.MIRROR,
                     notification(),
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION,
                 )
             } else {
-                startForeground(NOTIFICATION_ID, notification())
+                startForeground(NotificationIds.MIRROR, notification())
             }
         }
         if (started.isFailure) {
@@ -75,7 +75,6 @@ class MirrorService : Service() {
     companion object {
         private const val TAG = "aster-mirror"
         private const val CHANNEL = "aster-mirror"
-        private const val NOTIFICATION_ID = 2
 
         fun start(ctx: Context) {
             ctx.startForegroundService(Intent(ctx, MirrorService::class.java))

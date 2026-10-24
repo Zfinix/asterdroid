@@ -1,6 +1,7 @@
 package dev.aster.probe
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import java.io.File
 
@@ -26,16 +27,27 @@ object Install {
      * one inside and never kept there. Folded rather than copied over, because
      * the phone's own settings screen writes to the same file and a push that
      * carries one key should not wipe the rest.
+     *
+     * Before Android 11 any app with storage access can write that dir too,
+     * and a `.env` chooses what runs as this app, so there it is refused.
      */
     fun env(context: Context) {
         val dropped = File(context.getExternalFilesDir(null) ?: return, ".env")
         if (!dropped.isFile) return
+        if (!importsEnv(Build.VERSION.SDK_INT)) {
+            runCatching { dropped.delete() }
+            Log.w(TAG, "refused a pushed .env below Android 11")
+            ActivityLog.state(context, "A pushed .env was ignored: before Android 11 other apps can write there. Set keys in the app instead.")
+            return
+        }
         runCatching {
             Env.merge(context, dropped)
             dropped.delete()
             Log.i(TAG, "imported .env")
         }.onFailure { Log.w(TAG, "could not import .env: $it") }
     }
+
+    fun importsEnv(sdk: Int): Boolean = sdk >= Build.VERSION_CODES.R
 
     /**
      * The agent calls the control client and itself by name, so give both one. A symlink

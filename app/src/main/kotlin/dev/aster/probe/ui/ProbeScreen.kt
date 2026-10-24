@@ -48,6 +48,8 @@ fun ProbeScreen(
     onModel: (String) -> Unit,
     onEffort: (String) -> Unit,
     onToggle: () -> Unit,
+    onChat: () -> Unit,
+    onConnect: () -> Unit,
     onHistory: () -> Unit,
     onSettings: () -> Unit,
 ) {
@@ -119,6 +121,12 @@ fun ProbeScreen(
             onEffort = onEffort,
             modifier = Modifier.padding(top = 8.dp),
         )
+        SectionLabel("CHAT", Modifier.padding(top = 24.dp))
+        GroupCard(Modifier.padding(top = 8.dp)) {
+            SettingRow(label = "Chat", value = "Talk to the agent here", onClick = onChat)
+            RowDivider()
+            SettingRow(label = "Computers", value = "Connect a computer", onClick = onConnect)
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()

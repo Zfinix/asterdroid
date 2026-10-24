@@ -74,6 +74,9 @@ fun SettingsScreen(
     raw: String,
     onSet: (String, String) -> Unit,
     onRaw: (String) -> Unit,
+    onConnect: () -> Unit,
+    onScan: () -> Unit,
+    onSetUp: () -> Unit,
     onBack: () -> Unit,
 ) {
     var view by remember { mutableStateOf<View>(View.List) }
@@ -124,12 +127,22 @@ fun SettingsScreen(
                         onSet(one.name, value)
                     },
                 )
-                else -> Keys(
-                    entries = entries,
-                    onEdit = { view = View.One(it.name) },
-                    onAdd = { view = View.New },
-                    onWhole = { view = View.Whole },
-                )
+                else -> {
+                    Keys(
+                        entries = entries,
+                        onEdit = { view = View.One(it.name) },
+                        onAdd = { view = View.New },
+                        onWhole = { view = View.Whole },
+                    )
+                    SectionLabel("SETUP", Modifier.padding(top = 24.dp, bottom = 8.dp))
+                    GroupCard {
+                        SettingRow(label = "Connect a computer", value = "MCP, ACP, relay", onClick = onConnect)
+                        RowDivider()
+                        SettingRow(label = "Scan a setup code", value = "", onClick = onScan)
+                        RowDivider()
+                        SettingRow(label = "Set up again", value = "", onClick = onSetUp)
+                    }
+                }
             }
             Spacer(Modifier.height(Gutter))
         }

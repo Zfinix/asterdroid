@@ -110,6 +110,10 @@ class AsterA11yService : AccessibilityService() {
                 addAction("$PKG.BENCH")
                 addAction("$PKG.CTL")
             },
+            // CTL runs any verb in any app, so only the shell may send it: DUMP
+            // is held by the shell and the system, and no app gets it without adb.
+            CTL_SENDER,
+            null,
             Context.RECEIVER_EXPORTED,
         )
     }
@@ -194,6 +198,15 @@ class AsterA11yService : AccessibilityService() {
     private fun serve(listening: LocalServerSocket) {
         while (true) {
             val client = runCatching { listening.accept() }.getOrNull() ?: break
+            // An abstract name is open to every app on the phone, and whoever
+            // reaches it drives the screen. Only this app's own children, and
+            // run-as during development, share its uid.
+            val peer = runCatching { client.peerCredentials.uid }.getOrDefault(-1)
+            if (peer != android.os.Process.myUid() && peer != ROOT_UID) {
+                Log.w(TAG, "refused a connection from uid $peer")
+                runCatching { client.close() }
+                continue
+            }
             val line = runCatching { client.inputStream.bufferedReader().readLine().orEmpty() }
                 .getOrNull()
                 ?.trim()
@@ -1880,6 +1893,8 @@ class AsterA11yService : AccessibilityService() {
         const val TAG = "ASTEREYES"
         const val PKG = "dev.aster.probe"
         const val SOCKET = "aster-eyes"
+        const val CTL_SENDER = "android.permission.DUMP"
+        const val ROOT_UID = 0
         const val MAX_NODES = 4000
         const val PREFETCH = AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_HYBRID or
             AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS or

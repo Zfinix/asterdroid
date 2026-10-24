@@ -21,8 +21,8 @@ android {
         applicationId = "dev.aster.probe"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = 3
+        versionName = "0.3.0"
     }
 
     // The agent and the control client ride here because an app may only exec
@@ -88,4 +88,14 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.activity:activity-compose:1.9.3")
+    // QR codes both ways: core draws the pairing code, the embedded view reads
+    // setup codes with the camera. Both are Apache-2.0 with no Play services,
+    // so the scanner still works on phones without Google and on F-Droid.
+    implementation("com.google.zxing:core:3.5.3")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
+    testImplementation("junit:junit:4.13.2")
+    // android.jar's org.json is a stub that throws on the JVM; the setup link
+    // and relay parsers are tested against the real thing.
+    testImplementation("org.json:json:20240303")
 }
