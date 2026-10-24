@@ -1,0 +1,42 @@
+{
+  "name": "@withaster/droid",
+  "version": "0.3.0",
+  "description": "Pair this computer with Droid and reach your phone from any MCP client or ACP editor.",
+  "license": "Apache-2.0",
+  "author": "Chiziaruhoma Ogbonda",
+  "homepage": "https://droid.withaster.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zfinix/asterdroid.git",
+    "directory": "cli"
+  },
+  "bugs": "https://github.com/Zfinix/asterdroid/issues",
+  "keywords": ["android", "phone", "mcp", "acp", "agent", "zed", "jetbrains", "claude"],
+  "mcpName": "io.github.Zfinix/droid",
+  "type": "module",
+  "bin": {
+    "aster-droid": "bin/aster-droid.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "qrcode-terminal": "0.12.0",
+    "ws": "8.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/ws": "8.18.2",
+    "typescript": "~5.9.3"
+  }
+}

@@ -1,0 +1,8 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+{
+  "theme": "One Dark", // keep this
+  "buffer_font_size": 15,
+}

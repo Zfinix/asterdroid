@@ -1,0 +1,11 @@
+{
+  "theme": "One Dark",
+  "agent_servers": {
+    "Other Agent": {
+      "type": "custom",
+      "command": "other",
+      "args": ["--acp"],
+      "env": {}
+    }
+  }
+}

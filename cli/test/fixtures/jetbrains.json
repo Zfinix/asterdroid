@@ -1,0 +1,13 @@
+{
+  "default_mcp_settings": {
+    "use_custom_mcp": true,
+    "use_idea_mcp": false
+  },
+  "agent_servers": {
+    "Agent Name": {
+      "command": "/path/to/agent",
+      "args": ["acp"],
+      "env": {}
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.Zfinix/droid",
+  "title": "Droid",
+  "description": "Let any agent use your own Android phone: read the screen, tap, type, and open apps.",
+  "websiteUrl": "https://droid.withaster.dev",
+  "repository": {
+    "url": "https://github.com/Zfinix/asterdroid",
+    "source": "github",
+    "subfolder": "cli"
+  },
+  "version": "0.3.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@withaster/droid",
+      "version": "0.3.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp"
+        }
+      ],
+      "environmentVariables": [
+        {
+          "name": "ASTER_DROID_HOME",
+          "description": "Where the pairing from `npx -y @withaster/droid pair` is kept. Defaults to ~/.config/aster-droid.",
+          "isRequired": false,
+          "format": "filepath"
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://relay.withaster.dev/p/{phone_id}/mcp",
+      "variables": {
+        "phone_id": {
+          "description": "Your phone's id from pairing, like ph_ followed by 26 letters and digits.",
+          "isRequired": true
+        }
+      },
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer and the token from pairing, as in Bearer ast_c_...",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

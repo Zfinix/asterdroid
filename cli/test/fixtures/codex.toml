@@ -1,0 +1,5 @@
+model = "gpt-5.5"
+
+[mcp_servers.github]
+command = "gh-mcp"
+args = []
