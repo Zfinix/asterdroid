@@ -1,0 +1,77 @@
+{
+  "frames": [
+    {
+      "name": "ctrl challenge",
+      "kind": 0,
+      "stream": 0,
+      "payload_hex": "7b2274223a226368616c6c656e6765222c226e6f6e6365223a22626d3975593255222c22686f7374223a2272656c61792e74657374227d",
+      "frame_hex": "00000000007b2274223a226368616c6c656e6765222c226e6f6e6365223a22626d3975593255222c22686f7374223a2272656c61792e74657374227d"
+    },
+    {
+      "name": "open mcp",
+      "kind": 1,
+      "stream": 1,
+      "payload_hex": "7b22737663223a226d6370222c22636c69656e74223a22635f30313233343536373839222c2273636f706573223a5b2270686f6e653a616374225d7d",
+      "frame_hex": "01000000017b22737663223a226d6370222c22636c69656e74223a22635f30313233343536373839222c2273636f706573223a5b2270686f6e653a616374225d7d"
+    },
+    {
+      "name": "data bytes",
+      "kind": 2,
+      "stream": 3,
+      "payload_hex": "00ff10",
+      "frame_hex": "020000000300ff10"
+    },
+    {
+      "name": "head",
+      "kind": 3,
+      "stream": 1,
+      "payload_hex": "7b22737461747573223a3230302c2268656164657273223a7b22636f6e74656e742d74797065223a226170706c69636174696f6e2f6a736f6e227d7d",
+      "frame_hex": "03000000017b22737461747573223a3230302c2268656164657273223a7b22636f6e74656e742d74797065223a226170706c69636174696f6e2f6a736f6e227d7d"
+    },
+    {
+      "name": "end on a phone stream",
+      "kind": 4,
+      "stream": 4294967294,
+      "payload_hex": "",
+      "frame_hex": "04fffffffe"
+    },
+    {
+      "name": "reset timeout",
+      "kind": 5,
+      "stream": 7,
+      "payload_hex": "7b22636f6465223a2274696d656f7574222c22726561736f6e223a2278227d",
+      "frame_hex": "05000000077b22636f6465223a2274696d656f7574222c22726561736f6e223a2278227d"
+    },
+    {
+      "name": "wsmsg text",
+      "kind": 6,
+      "stream": 5,
+      "payload_hex": "006869",
+      "frame_hex": "0600000005006869"
+    },
+    {
+      "name": "credit 2 MiB",
+      "kind": 7,
+      "stream": 9,
+      "payload_hex": "00200000",
+      "frame_hex": "070000000900200000"
+    }
+  ],
+  "chunk": {
+    "body_len": 262145,
+    "frame_lens": [
+      262144,
+      1
+    ]
+  },
+  "identity": {
+    "seed_hex": "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60",
+    "pub_b64url": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+    "phone_id": "ph_eh7ddx5bksrgcytl7bkai36se4",
+    "fp": "cdekyme7e2r7azbg",
+    "nonce": "bm9uY2U",
+    "host": "relay.test",
+    "message": "aster-relay/v1/link\nph_eh7ddx5bksrgcytl7bkai36se4\nbm9uY2U\nrelay.test",
+    "sig_b64url": "gEMJdXB5TdC67bLb_FWcj_xFRoFA6t_S3laU-Le_xhRTjFsPOo0TrttXe8dQp5wE1o-jiQ-R0_hqDwNwiB6gAA"
+  }
+}

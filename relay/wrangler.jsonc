@@ -1,0 +1,33 @@
+// Aster Relay: reach a phone running Droid from anywhere. See docs/RELAY.md.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "aster-relay",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  // The hosted relay answers on its own domain. Uncomment for that deploy only;
+  // a self-hosted copy lives on its workers.dev address and needs no route.
+  // "routes": [{ "pattern": "relay.withaster.dev", "custom_domain": true }],
+  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true },
+  "durable_objects": {
+    "bindings": [
+      { "name": "PHONE", "class_name": "Phone" },
+      { "name": "PAIR", "class_name": "PairIndex" }
+    ]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Phone", "PairIndex"] }],
+  "ratelimits": [
+    { "name": "RL_CLAIM", "namespace_id": "1001", "simple": { "limit": 10, "period": 60 } },
+    { "name": "RL_CLIENT", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } },
+    { "name": "RL_LINK", "namespace_id": "1003", "simple": { "limit": 20, "period": 60 } },
+    { "name": "RL_IP", "namespace_id": "1004", "simple": { "limit": 600, "period": 60 } }
+  ],
+  "vars": {
+    // "off" entitles every phone: the setting for a self-hosted relay.
+    "BILLING": "off",
+    // The host phones sign for in the link challenge. Empty means the request's own host.
+    "RELAY_HOST": ""
+  },
+  // Request bodies carry screen text and screenshots; only metadata is logged.
+  "observability": { "enabled": true, "head_sampling_rate": 1 }
+  // Secrets, set with `wrangler secret put`: ADMIN_SECRET (optional, enables /v1/admin/*).
+}
