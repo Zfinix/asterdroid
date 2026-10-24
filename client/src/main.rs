@@ -1,11 +1,16 @@
 //! Proof that the Rust agent can reach the APK's accessibility server on-device.
 //! Abstract unix socket, so there is no path on disk and no permissions to get wrong.
 
+mod acp;
+mod frame;
+mod mcp;
+mod relay;
 mod server;
 mod socket;
 
 /// The agent calls this through its run_command tool, which waits for exit, so
 /// serve re-execs itself in the background and the caller gets the URL at once.
+#[expect(clippy::zombie_processes, reason = "this process exits next, so init reaps the mirror")]
 fn serve_detached(port: u16, bind: &str) {
     let addr = format!("{bind}:{port}");
     if std::net::TcpStream::connect_timeout(
@@ -49,13 +54,62 @@ fn main() {
         }
         return;
     }
+    if args.first().map(String::as_str) == Some("mcp") {
+        let rest: Vec<String> = args.iter().skip(1).cloned().collect();
+        if !rest.iter().any(|a| a == "--http") {
+            mcp::stdio();
+            return;
+        }
+        let port = rest
+            .iter()
+            .find_map(|a| a.parse::<u16>().ok())
+            .unwrap_or(mcp::DEFAULT_PORT);
+        let bind = rest
+            .iter()
+            .position(|a| a == "--bind")
+            .and_then(|i| rest.get(i + 1))
+            .map(String::as_str)
+            .unwrap_or(mcp::DEFAULT_BIND);
+        mcp::http(port, bind);
+        return;
+    }
+    if args.first().map(String::as_str) == Some("acp") {
+        let rest: Vec<String> = args.iter().skip(1).cloned().collect();
+        if !rest.iter().any(|a| a == "--ws") {
+            eprintln!("usage: asterctl acp --ws [port] [--bind ip], with {} set", acp::TOKEN_ENV);
+            std::process::exit(2);
+        }
+        let port = rest
+            .iter()
+            .find_map(|a| a.parse::<u16>().ok())
+            .unwrap_or(acp::DEFAULT_PORT);
+        let bind = rest
+            .iter()
+            .position(|a| a == "--bind")
+            .and_then(|i| rest.get(i + 1))
+            .map(String::as_str)
+            .unwrap_or(acp::DEFAULT_BIND);
+        acp::ws(port, bind);
+        return;
+    }
+    if args.first().map(String::as_str) == Some("relay") {
+        let rest: Vec<String> = args.iter().skip(1).cloned().collect();
+        if rest.is_empty() {
+            relay::run();
+            return;
+        }
+        std::process::exit(relay::verb(&rest));
+    }
     if args.is_empty() {
         println!(
-            "usage: asterctl <verb> [args] | asterctl serve\n\
+            "usage: asterctl <verb> [args] | asterctl serve | asterctl mcp | asterctl acp | asterctl relay\n\
              verbs: map find tap do press swipe drag slide hold pinch text type clear scroll key volume media wait later ocr shot marks notes alerts apps \
              open restart install settings dial sms url web place search alarm timer event wallpaper \
              quicksettings notifications emergency pace capture help\n\
              serve: the mirror, http://127.0.0.1:7070 [port] [--bind ip], screen out and touches in\n\
+             mcp: an MCP server on stdio; mcp --http [port] [--bind ip] with ASTER_MCP_TOKEN set, default 127.0.0.1:7071\n\
+             acp --ws [port] [--bind ip]: the phone's agent over ACP for editors, with ASTER_ACP_TOKEN set, default 127.0.0.1:7072\n\
+             relay: reach the phone from anywhere through ASTER_RELAY_URL; relay pair|clients|revoke <id|all>|status|approve <id> yes|no talk to it\n\
              The full reference is the android-use skill already in your prompt."
         );
         std::process::exit(2);

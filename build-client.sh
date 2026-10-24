@@ -15,8 +15,10 @@ fi
 # Find the bin directory for the toolchain
 BIN="$NDK/toolchains/llvm/prebuilt/$(ls "$NDK/toolchains/llvm/prebuilt" | sort | head -n1)/bin"
 
-# Set cargo linker environment variable
+# Point cargo and cc-rs at the NDK toolchain
+export AR_aarch64_linux_android="$BIN/llvm-ar"
 export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$BIN/aarch64-linux-android29-clang"
+export CC_aarch64_linux_android="$BIN/aarch64-linux-android29-clang"
 
 # Clean previous build artifacts for a 'clean' build
 cargo clean --manifest-path client/Cargo.toml
