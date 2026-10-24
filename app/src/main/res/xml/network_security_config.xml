@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Cleartext is off for the platform's HTTP stack everywhere, keys included.
+     A rule here can only name hosts, not address ranges, so plain http to a
+     laptop on the LAN goes through Lan.get, which checks the address is
+     private before it connects. The names below are the phone itself and the
+     emulator's view of the computer it runs on. The bundled agent is native
+     code and keeps its own rules (Lan.allowedUrl gates what the app writes). -->
+<network-security-config>
+  <base-config cleartextTrafficPermitted="false">
+    <trust-anchors>
+      <certificates src="system"/>
+    </trust-anchors>
+  </base-config>
+  <domain-config cleartextTrafficPermitted="true">
+    <domain includeSubdomains="false">localhost</domain>
+    <domain includeSubdomains="false">127.0.0.1</domain>
+    <domain includeSubdomains="false">10.0.2.2</domain>
+  </domain-config>
+</network-security-config>

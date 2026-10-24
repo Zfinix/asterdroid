@@ -13,7 +13,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import dev.aster.probe.R
 
-/** Mark and wordmark at one height, so the star's top and bottom meet the A's cap and baseline. */
+/** Mark and wordmark at one height, so the star spans the name from its tallest letter to its baseline. */
 @Composable
 fun Lockup(modifier: Modifier = Modifier) {
     Row(
@@ -27,8 +27,8 @@ fun Lockup(modifier: Modifier = Modifier) {
             modifier = Modifier.size(LockupHeight),
         )
         Image(
-            painter = painterResource(R.drawable.aster_wordmark),
-            contentDescription = "Aster",
+            painter = painterResource(R.drawable.droid_wordmark),
+            contentDescription = "Droid",
             colorFilter = ColorFilter.tint(Ink.text),
             modifier = Modifier.height(LockupHeight),
         )

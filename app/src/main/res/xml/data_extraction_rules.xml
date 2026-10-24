@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12 and later. allowBackup="false" already stops cloud backup;
+     a device-to-device transfer still runs, and must not carry the keys or
+     the relay identity to the new phone. -->
+<data-extraction-rules>
+  <cloud-backup>
+    <exclude domain="file" path=".env"/>
+    <exclude domain="file" path=".env.writing"/>
+    <exclude domain="file" path=".aster"/>
+  </cloud-backup>
+  <device-transfer>
+    <exclude domain="file" path=".env"/>
+    <exclude domain="file" path=".env.writing"/>
+    <exclude domain="file" path=".aster"/>
+  </device-transfer>
+</data-extraction-rules>

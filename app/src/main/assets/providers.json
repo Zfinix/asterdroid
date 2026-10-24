@@ -412,6 +412,23 @@
       "notes": "Aggregator. Model IDs are org-prefixed."
     },
     {
+      "id": "kilo",
+      "name": "Kilo Gateway (free, no account)",
+      "base_url": "https://ai-gateway.kilo.ai/api/v1",
+      "example_model": "nvidia/nemotron-3.5-super-vl:free",
+      "key_env": [
+        "KILO_API_KEY"
+      ],
+      "auth": "optional Bearer",
+      "recommended": [
+        "nvidia/nemotron-3.5-super-vl:free",
+        "dots-studio/dots-3-note-preview:free",
+        "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "nvidia/nemotron-3-ultra-550b-a55b:free"
+      ],
+      "notes": "Models ending in :free need no key, about 200 requests an hour per IP. Free requests go to NVIDIA trial endpoints, which are logged."
+    },
+    {
       "id": "orcarouter",
       "name": "OrcaRouter",
       "base_url": "https://api.orcarouter.ai/v1",

@@ -17,6 +17,23 @@ object Env {
 
     const val TELEGRAM_TOKEN = "ASTER_TELEGRAM_TOKEN"
     const val REMOTE_USERS = "ASTER_REMOTE_USERS"
+    /** A shell command run in place of the bundled agent, so any harness can live on the phone. */
+    const val AGENT_CMD = "ASTER_AGENT_CMD"
+    /** Set, and the phone also serves MCP over HTTP to whoever presents it. */
+    const val MCP_TOKEN = "ASTER_MCP_TOKEN"
+    const val MCP_PORT = "ASTER_MCP_PORT"
+    const val MCP_BIND = "ASTER_MCP_BIND"
+    /** Which chat app reaches the agent: app, telegram, photon or none. See [Channel]. */
+    const val CHANNEL = "ASTER_CHANNEL"
+    /** Set, and editors that speak ACP can drive the phone's agent over a WebSocket. */
+    const val ACP_TOKEN = "ASTER_ACP_TOKEN"
+    const val ACP_PORT = "ASTER_ACP_PORT"
+    const val ACP_BIND = "ASTER_ACP_BIND"
+    /** `on` keeps a connection to Aster Relay, so paired clients reach the phone from anywhere. */
+    const val RELAY = "ASTER_RELAY"
+    const val RELAY_URL = "ASTER_RELAY_URL"
+    const val PHOTON_KEY = "ASTER_PHOTON_KEY"
+    const val PHOTON_PROJECT = "ASTER_PHOTON_PROJECT"
 
     fun file(context: Context): File = File(context.filesDir, ".env")
 
@@ -26,11 +43,29 @@ object Env {
 
     fun value(context: Context, name: String): String? = all(context)[name]
 
+    /** What a child may inherit: never a name that tells the dynamic linker what to load. */
+    fun inheritable(values: Map<String, String>): Map<String, String> = values.filterKeys { name ->
+        val upper = name.uppercase()
+        !upper.startsWith("LD_") && !upper.startsWith("DYLD_")
+    }
+
     /** Set one name, or drop its line when the value is blank. */
     fun set(context: Context, name: String, value: String) {
         val wanted = value.trim()
         val kept = lines(context).filterNot { nameOf(it) == name }
         write(context, if (wanted.isEmpty()) kept else kept + "$name=$wanted")
+    }
+
+    /**
+     * Several names in one write. Setting them one by one rewrites the file
+     * each time, and a reader in between sees half of a change that only makes
+     * sense whole, such as a channel without its token.
+     */
+    fun setAll(context: Context, values: Map<String, String>) {
+        if (values.isEmpty()) return
+        val wanted = values.mapValues { it.value.trim() }
+        val kept = lines(context).filterNot { nameOf(it) in wanted.keys }
+        write(context, kept + wanted.filterValues { it.isNotEmpty() }.map { (name, value) -> "$name=$value" })
     }
 
     /**
