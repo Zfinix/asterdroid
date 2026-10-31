@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/aster-logo.png" alt="Droid logo" width="88" />
+<img src="docs/droid-icon.png" alt="Droid, with Tap the bunny" width="96" />
 
 # Droid
 
@@ -10,13 +10,13 @@ An agent that uses your Android phone the way you do. Run it on any model,
 free and local ones included, drive the phone from any agent over MCP and ACP,
 and talk to it in the app, on Telegram, or on WhatsApp and iMessage through Photon.
 
-[![Release](https://img.shields.io/github/v/release/Zfinix/asterdroid?style=flat-square)](https://github.com/Zfinix/asterdroid/releases/latest)
+[![Release](https://img.shields.io/github/v/release/Zfinix/droid?style=flat-square)](https://github.com/Zfinix/droid/releases/latest)
 [![Platform](https://img.shields.io/badge/platform-Android-green?style=flat-square&logo=android&logoColor=white)](https://www.android.com/)
-[![Arch](https://img.shields.io/badge/arch-arm64--v8a-blue?style=flat-square)](https://github.com/Zfinix/asterdroid)
+[![Arch](https://img.shields.io/badge/arch-arm64--v8a-blue?style=flat-square)](https://github.com/Zfinix/droid)
 
-**[Website](https://droid.withaster.dev)** · [Get the app](https://github.com/Zfinix/asterdroid/releases/latest) · [Setup](docs/SETUP.md)
+**[Website](https://droid.withaster.dev)** · [Get the app](https://github.com/Zfinix/droid/releases/latest) · [Setup](docs/SETUP.md)
 
-<img src="docs/mirror-wordle.png" alt="A chat on the left, the phone's mirrored screen on the right" width="720" />
+<img src="docs/hero.jpg" alt="Droid in iMessage: asked to order the usual from KFC, it finds the deal, waits for a yes, places the order and says it will check on the driver" width="720" />
 
 </div>
 
@@ -32,7 +32,7 @@ Droid (`dev.aster.probe`) gives an AI agent your phone's screen. An accessibilit
 
 ## Quick start
 
-1. Install the APK from the [latest release](https://github.com/Zfinix/asterdroid/releases/latest) and open it.
+1. Install the APK from the [latest release](https://github.com/Zfinix/droid/releases/latest) and open it.
 2. Onboarding picks a model. **Try it free** needs no account and no key; you can also use a model on your computer or sign in with a provider.
 3. Choose where to talk to it: the chat in the app, Telegram, or Photon.
 4. Grant what it asks for: accessibility, the keyboard, notification access. Then say what you want done:
@@ -96,8 +96,8 @@ Start on free models with no key, connect a cloud provider, or use a model serve
 
 <table>
   <tr>
-    <td><img src="docs/shot-providers.jpg" alt="The provider picker: Baseten, DeepSeek, Fireworks AI, Google Gemini, Hugging Face Router, LM Studio, Ollama, OpenRouter and more" width="420" /></td>
-    <td><img src="docs/shot-settings.jpg" alt="The settings screen listing keys, all masked" width="420" /></td>
+    <td><img src="docs/shot-providers.jpg" alt="Onboarding, Choose a brain: Try it free with no account, Use my computer's model, or Sign in or use a key" width="420" /></td>
+    <td><img src="docs/shot-channel.jpg" alt="Onboarding, Where to talk to it: in this app, Telegram, iMessage or WhatsApp, or nowhere so other agents drive it" width="420" /></td>
   </tr>
 </table>
 
@@ -118,7 +118,7 @@ You can also swap the agent that runs on the phone for your own command. Details
 
 <div align="center">
 
-<img src="docs/shot-home.jpg" alt="The app home screen: permissions on, agent provider and model, live activity, and a Stop the agent button" width="360" />
+<img src="docs/shot-home.jpg" alt="The Droid home screen: permissions on, the free model, the chat, and a Stop the agent button" width="360" />
 
 </div>
 
@@ -141,7 +141,7 @@ After a run it scores its own rounds, keeps the shortest path, and saves it as a
 
 | doc | what is in it |
 | --- | --- |
-| [SETUP](docs/SETUP.md) | Telegram bot setup in detail, pushed `.env`, configuration variables, troubleshooting |
+| [SETUP](docs/SETUP.md) | Telegram in detail, configuring from a computer, configuration variables, troubleshooting |
 | [PROVIDERS](docs/PROVIDERS.md) | all 40 providers with key pages and env variables |
 | [USING](docs/USING.md) | chat commands, the control protocol, action receipts, the screen mirror, other agents over MCP |
 | [CLI](cli/README.md) | `@withaster/droid`: pairing a computer, `setup` for each client, the stdio MCP and ACP bridges |
@@ -154,8 +154,11 @@ After a run it scores its own rounds, keeps the shortest path, and saves it as a
 
 A foreground service runs the agent as a child process, with a bridge to Telegram or Photon when one is chosen. The agent calls `asterctl`, which talks to `AsterA11yService` over an abstract Unix socket; the service reads accessibility trees, dispatches gestures and captures screenshots. Other agents reach the same service through `asterctl mcp`, and editors reach the agent through `asterctl acp`. Full detail in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-<div align="center">
-
-<img src="docs/architecture.png" alt="Architecture: the chat to the agent to asterctl to the accessibility service" width="640" />
-
-</div>
+```mermaid
+flowchart LR
+    you["You"] -->|"app, Telegram,<br>WhatsApp, iMessage"| agent["The agent<br>libaster.so"]
+    others["Claude Code, Codex,<br>Cursor, Zed, JetBrains"] -->|"MCP, ACP"| ctl
+    agent -->|"run_command"| ctl["asterctl"]
+    ctl -->|"abstract socket"| a11y["AsterA11yService"]
+    a11y -->|"read, tap, type"| screen["Your apps"]
+```

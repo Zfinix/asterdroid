@@ -8,9 +8,9 @@ The short path is in the [README](../README.md#quick-start). This page is the sa
 
 Open [@BotFather](https://t.me/BotFather) in Telegram and send `/newbot`. Follow the prompts to name your bot and choose its username. BotFather returns a bot token. Copy it and keep the link to your new bot handy. See [Telegram's bot setup guide](https://core.telegram.org/bots/tutorial#obtain-your-bot-token) for details.
 
-### 2. Add the token to asterdroid
+### 2. Add the token to Droid
 
-On the Android phone, open asterdroid and tap the settings icon in the top right.
+On the Android phone, open Droid and tap the settings icon in the top right.
 
 - Paste the full bot token into **Telegram token**.
 - Select your model provider and enter its API key. The settings sheet shows the env variable each provider expects. The full list is in [PROVIDERS.md](PROVIDERS.md).
@@ -20,7 +20,7 @@ Save the settings. Changes are written to the agent's `.env`; saving a key resta
 
 ### 3. Start the agent and message your bot
 
-Press the start control on asterdroid's home screen. Wait for the notification to say **Connected to Telegram**.
+Press the start control on Droid's home screen. Wait for the notification to say **Connected to Telegram**.
 
 In Telegram, open the bot you just created and send `hello`. Send this to your own bot, not BotFather.
 
@@ -34,7 +34,7 @@ Copy the user ID from your reply. The number above is an example.
 
 ### 4. Allow your Telegram account
 
-Return to asterdroid's settings, paste that numeric ID into **Allowed ids**, and save. Use your user ID here, not your Telegram username or bot token. To allow multiple accounts, separate their IDs with commas.
+Return to Droid's settings, paste that numeric ID into **Allowed ids**, and save. Use your user ID here, not your Telegram username or bot token. To allow multiple accounts, separate their IDs with commas.
 
 The reply mentions `--user`, but on Android you configure this through **Allowed ids**. Once configured, the bot ignores accounts outside that list.
 
@@ -48,7 +48,7 @@ Open settings and turn on Do Not Disturb.
 
 The agent should respond and carry out the action on the Android phone. Use `/help` for chat commands, or `/mirror` to view the phone in a browser.
 
-If the bot does not reply, check that asterdroid says **Connected to Telegram**, that you opened the bot whose token you entered, and that **Allowed ids** contains the ID from your own reply.
+If the bot does not reply, check that Droid says **Connected to Telegram**, that you opened the bot whose token you entered, and that **Allowed ids** contains the ID from your own reply.
 
 ## Optional: configure from your computer
 

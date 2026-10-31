@@ -1,8 +1,8 @@
-# asterdroid architecture
+# Droid architecture
 
 ## What this is
 
-asterdroid runs the real Aster agent on an Android phone. The app is `dev.aster.probe`. It reads the screen through an accessibility service, touches it the way a thumb does, and answers over Telegram. The person holding the conversation is usually nowhere near the phone.
+Droid runs the real Aster agent on an Android phone. The app is `dev.aster.probe`. It reads the screen through an accessibility service, touches it the way a thumb does, and answers in the app, on Telegram, or on WhatsApp and iMessage through Photon. The person holding the conversation is usually nowhere near the phone.
 
 It is not a port and not a subset. `build-agent.sh` cross-compiles `aster-cli` for `aarch64-linux-android` and ships it inside the APK as `libaster.so`. The tools, skills, prompts and review path are the code that runs in a terminal. It started as a measuring rig for the questions `docs/COMPUTER-USE.md` leaves open on Android, and it is now the daily-driver way to run Aster on a phone.
 
@@ -12,21 +12,29 @@ The hard part is not the model. A phone has no shell, so the screen is the only 
 
 ```mermaid
 flowchart LR
-    tg["Telegram"] <-->|"bot API"| agent
+    you["You"] -->|"in the app"| chat
+    you -->|"Telegram,<br>WhatsApp, iMessage"| bridge
+    host["Claude Code, Codex,<br>Cursor, any MCP client"] -->|"MCP"| mcp
+    editor["Zed, JetBrains"] -->|"ACP"| acpws
     subgraph phone["Android phone, app dev.aster.probe"]
-        svc["AsterAgentService<br>foreground service"] -->|"supervises,<br>restarts with backoff"| agent["libaster.so<br>aster remote telegram"]
-        agent -->|"run_command"| ctl["asterctl<br>libclient.so"]
+        svc["AsterAgentService<br>foreground service"] -->|"supervises"| bridge["libaster.so<br>aster remote telegram / spectrum"]
+        chat["In-app chat"] -->|"stdio"| acp["libaster.so<br>aster acp"]
+        svc -->|"supervises"| mcp["asterctl mcp"]
+        svc -->|"supervises"| acpws["asterctl acp --ws"]
+        acpws --> acp
+        bridge -->|"run_command"| ctl["asterctl<br>libclient.so"]
+        acp -->|"run_command"| ctl
+        mcp --> ctl
         ctl -->|"@aster-eyes<br>abstract socket"| a11y["AsterA11yService<br>accessibility service"]
-        a11y -->|"reads the tree,<br>dispatches gestures,<br>OCR fallback"| screen["the phone's screen"]
+        a11y -->|"reads the tree,<br>gestures, OCR"| screen["the phone's screen"]
         ime["AsterIme"] -.->|"typing"| screen
-        ctl --> serve["asterctl serve<br>the mirror"]
-        serve -->|"H.264 out,<br>touches in"| web["Browser"]
     end
 ```
 
 One process tree on the phone:
 
-- **Telegram** is the interface. The agent runs `remote telegram` as a child of `AsterAgentService`, in `yolo` mode, because there is no terminal on the phone to answer a permission prompt. Consent lives in the chat: before anything that leaves the device, the agent states the concrete effect in one line and then does it.
+- **The chat** is the interface: the in-app chat by default, which talks to an `aster acp` child over stdio, or a bridge (`remote telegram` for Telegram, `remote spectrum` for WhatsApp and iMessage through Photon) supervised by `AsterAgentService`. There is no terminal on the phone to answer a permission prompt, so consent lives in the chat: before anything that leaves the device, the agent states the concrete effect in one line and waits for a yes.
+- **Other agents** reach the phone without its own agent. `asterctl mcp` serves the screen to any MCP client, and `asterctl acp --ws` gives editors the agent over ACP.
 - **libaster.so** is the agent. It calls `asterctl` through `run_command`, the same way it calls anything else.
 - **asterctl** is the agent's body, a small Rust client. It speaks to the accessibility service over an abstract unix socket named `@aster-eyes`. Abstract means there is no file on disk and no permissions to get wrong. Connecting costs about 150 microseconds, which is why paying it per verb is fine.
 - **AsterA11yService** does the touching. It reads the pruned node tree, dispatches gestures, and falls back to OCR where the tree is blind.

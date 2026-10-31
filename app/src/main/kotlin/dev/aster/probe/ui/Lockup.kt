@@ -13,7 +13,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import dev.aster.probe.R
 
-/** Mark and wordmark at one height, so the star spans the name from its tallest letter to its baseline. */
+/** Tap and the wordmark at one height, so the avatar spans the name from its tallest letter to its baseline. */
 @Composable
 fun Lockup(modifier: Modifier = Modifier) {
     Row(
@@ -22,7 +22,7 @@ fun Lockup(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
-            painter = painterResource(R.drawable.aster_mark),
+            painter = painterResource(R.drawable.tap_mark),
             contentDescription = null,
             modifier = Modifier.size(LockupHeight),
         )

@@ -1,8 +1,8 @@
-# asterdroid architecture
+# Droid on Android, in depth
 
 ## What this is
 
-asterdroid runs the real Aster agent on an Android phone. The app is `dev.aster.probe`. It reads the screen through an accessibility service, touches it the way a thumb does, and answers over Telegram. The person holding the conversation is usually nowhere near the phone.
+Droid runs the real Aster agent on an Android phone. The app is `dev.aster.probe`. It reads the screen through an accessibility service, touches it the way a thumb does, and answers in the app, on Telegram, or on WhatsApp and iMessage through Photon. The person holding the conversation is usually nowhere near the phone.
 
 It is not a port and not a subset. `build-agent.sh` cross-compiles `aster-cli` for `aarch64-linux-android` and ships it inside the APK as `libaster.so`. The tools, skills, prompts and review path are the code that runs in a terminal. It started as a measuring rig for the questions `docs/COMPUTER-USE.md` leaves open on Android, and it is now the daily-driver way to run Aster on a phone.
 
@@ -131,7 +131,7 @@ Three rules keep the verifier honest, and each one came from watching the agent 
 
 ## The instructions
 
-The load-bearing part of asterdroid is not Kotlin. It is `device-AGENTS.md`, shipped as `assets/AGENTS.md`, and the skills in `skills/`, shipped flat into assets by the Gradle `syncDocs` task.
+The load-bearing part of Droid is not Kotlin. It is `device-AGENTS.md`, shipped as `assets/AGENTS.md`, and the skills in `skills/`, shipped flat into assets by the Gradle `syncDocs` task.
 
 Those files are the agent's entire understanding of what it is and where it is. Changing behavior means changing those files, not adding code. `Install.kt` refreshes the binaries, skills and instructions on every service start, so shipping a behavior change needs nobody to open the app. Change the Markdown, rebuild, install, and the next service start picks it up.
 

@@ -52,7 +52,6 @@ fun ActivityFeed(entries: List<ActivityLog.Entry>, modifier: Modifier = Modifier
         ) {
             when {
                 entries.isEmpty() -> EmptyState(
-                    icon = Glyph.agent,
                     title = "No activity yet",
                     detail = "Start the agent. Its actions show here.",
                 )
