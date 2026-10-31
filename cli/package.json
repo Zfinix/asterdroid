@@ -7,10 +7,10 @@
   "homepage": "https://droid.withaster.dev",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Zfinix/asterdroid.git",
+    "url": "git+https://github.com/Zfinix/droid.git",
     "directory": "cli"
   },
-  "bugs": "https://github.com/Zfinix/asterdroid/issues",
+  "bugs": "https://github.com/Zfinix/droid/issues",
   "keywords": ["android", "phone", "mcp", "acp", "agent", "zed", "jetbrains", "claude"],
   "mcpName": "io.github.Zfinix/droid",
   "type": "module",

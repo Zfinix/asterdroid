@@ -3,13 +3,13 @@
   "name": "Droid by Aster",
   "version": "0.3.0",
   "description": "The agent on your own Android phone, using its apps for you from your editor",
-  "repository": "https://github.com/Zfinix/asterdroid",
+  "repository": "https://github.com/Zfinix/droid",
   "website": "https://droid.withaster.dev",
   "authors": [
     "Chiziaruhoma Ogbonda"
   ],
   "license": "Apache-2.0",
-  "license_url": "https://github.com/Zfinix/asterdroid/blob/main/LICENSE",
+  "license_url": "https://github.com/Zfinix/droid/blob/main/LICENSE",
   "distribution": {
     "npx": {
       "package": "@withaster/droid@0.3.0",

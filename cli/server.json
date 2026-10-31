@@ -5,7 +5,7 @@
   "description": "Let any agent use your own Android phone: read the screen, tap, type, and open apps.",
   "websiteUrl": "https://droid.withaster.dev",
   "repository": {
-    "url": "https://github.com/Zfinix/asterdroid",
+    "url": "https://github.com/Zfinix/droid",
     "source": "github",
     "subfolder": "cli"
   },
