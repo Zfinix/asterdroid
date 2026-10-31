@@ -1,5 +1,6 @@
 package dev.aster.probe.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,12 +14,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import dev.aster.probe.R
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
-/** A quiet centre for a list with nothing in it: a mark, a line, a reason. */
+/** A quiet centre for a list with nothing in it: a mark, a line, a reason. With no icon, the mark is Tap. */
 @Composable
-fun EmptyState(icon: ImageVector, title: String, detail: String, modifier: Modifier = Modifier) {
+fun EmptyState(title: String, detail: String, modifier: Modifier = Modifier, icon: ImageVector? = null) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -26,7 +29,11 @@ fun EmptyState(icon: ImageVector, title: String, detail: String, modifier: Modif
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Icon(icon, contentDescription = null, tint = Ink.faint, modifier = Modifier.size(28.dp))
+        if (icon != null) {
+            Icon(icon, contentDescription = null, tint = Ink.faint, modifier = Modifier.size(28.dp))
+        } else {
+            Image(painterResource(R.drawable.tap_mark), contentDescription = null, modifier = Modifier.size(56.dp))
+        }
         Spacer(Modifier.height(12.dp))
         Text(text = title, style = Type.body, color = Ink.dim, textAlign = TextAlign.Center)
         Spacer(Modifier.height(4.dp))

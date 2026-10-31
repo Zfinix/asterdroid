@@ -1,5 +1,6 @@
 package dev.aster.probe.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -12,8 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import dev.aster.probe.R
 
 /** What was said, by the person or by the agent, on a soft card. */
 @Composable
@@ -27,12 +30,20 @@ fun MessageBubble(text: AnnotatedString, agent: Boolean) {
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.Top,
     ) {
-        Icon(
-            imageVector = if (agent) Glyph.agent else Glyph.user,
-            contentDescription = null,
-            tint = if (agent) Ink.accent else Ink.faint,
-            modifier = Modifier.size(16.dp).padding(top = 2.dp),
-        )
+        if (agent) {
+            Image(
+                painterResource(R.drawable.tap_mark),
+                contentDescription = null,
+                modifier = Modifier.size(18.dp).padding(top = 1.dp),
+            )
+        } else {
+            Icon(
+                imageVector = Glyph.user,
+                contentDescription = null,
+                tint = Ink.faint,
+                modifier = Modifier.size(16.dp).padding(top = 2.dp),
+            )
+        }
         Text(text = text, style = Type.prose, color = Ink.text)
     }
 }

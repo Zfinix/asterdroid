@@ -121,14 +121,12 @@ fun ChatScreen(
                 .weight(1f),
         ) {
             when {
-                off != null -> EmptyState(icon = Glyph.agent, title = "The chat is off", detail = off)
+                off != null -> EmptyState(title = "The chat is off", detail = off)
                 !running -> EmptyState(
-                    icon = Glyph.agent,
                     title = "The agent is not running",
                     detail = "Start it to chat. It keeps running when you leave the app.",
                 )
                 items.isEmpty() && !starting -> EmptyState(
-                    icon = Glyph.agent,
                     title = "Ask Droid to do something",
                     detail = "It uses this phone the way you would: it opens apps, reads the screen, taps " +
                         "and types. It asks you before anything risky.",
